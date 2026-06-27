@@ -14,7 +14,13 @@ function initAdmin() {
     let serviceAccount;
     // 1. Try to load from environment variable (Vercel)
     if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+      try {
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+      } catch (parseError) {
+        console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY environment variable. Make sure you pasted the exact JSON.");
+        console.error("Parse Error Details:", parseError);
+        return admin.initializeApp();
+      }
     } 
     // 2. Fallback to local file (Local Development)
     else if (fs.existsSync(serviceAccountPath)) {
