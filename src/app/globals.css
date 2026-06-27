@@ -1,26 +1,83 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Colors */
+  --color-canvas-ice: #e5e7eb;
+  --color-midnight-ink: #000000;
+  --color-paper-white: #ffffff;
+  --color-fog-gray: #979797;
+  --color-ash-gray: #444444;
+  --color-faint-mist: #f3f3f3;
+  --color-deep-smoke: #2f2f2f;
+  --color-action-green: #d1ffca;
+  --color-alert-yellow: #fff100;
+
+  /* Typography */
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-bebas);
+  --font-mono: var(--font-mono);
+
+  /* Typography — Scale */
+  --text-caption: 12px;
+  --text-caption--line-height: 1.6;
+  --text-caption--letter-spacing: -0.36px;
+  
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.3;
+  --text-body-sm--letter-spacing: -0.42px;
+  
+  --text-body: 16px;
+  --text-body--line-height: 1.25;
+  --text-body--letter-spacing: -0.42px;
+  
+  --text-subheading: 18px;
+  --text-subheading--line-height: 1.2;
+  --text-subheading--letter-spacing: -0.72px;
+  
+  --text-heading: 28px;
+  --text-heading--line-height: 1.14;
+  
+  --text-heading-lg: 40px;
+  --text-heading-lg--line-height: 1.1;
+  
+  --text-display-sm: 48px;
+  --text-display-sm--line-height: 0.9;
+  --text-display-sm--letter-spacing: -1.44px;
+  
+  --text-display: 130px;
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: -3.9px;
+
+  /* Spacing */
+  --spacing-8: 8px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-40: 40px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+  --spacing-96: 96px;
+
+  /* Border Radius */
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-3xl-2: 32px;
+  --radius-full: 48px;
+  --radius-full-2: 64px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Base resets & theme application */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-canvas-ice);
+  color: var(--color-midnight-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: var(--color-action-green);
+  color: var(--color-midnight-ink);
 }
