@@ -7,11 +7,19 @@ from firebase_admin import credentials, firestore
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CREDENTIALS_PATH = os.path.join(BASE_DIR, "whatsapp-doctor-booking-firebase-adminsdk-fbsvc-6829c11a41.json")
 
+import json
+
 def init_firebase():
     """Initializes the Firebase Admin SDK if it hasn't been initialized yet."""
     if not firebase_admin._apps:
         try:
-            cred = credentials.Certificate(CREDENTIALS_PATH)
+            env_cred = os.environ.get("FIREBASE_SERVICE_ACCOUNT_KEY")
+            if env_cred:
+                cred_dict = json.loads(env_cred)
+                cred = credentials.Certificate(cred_dict)
+            else:
+                cred = credentials.Certificate(CREDENTIALS_PATH)
+            
             firebase_admin.initialize_app(cred)
             print("✅ Firebase initialized successfully.")
         except Exception as e:

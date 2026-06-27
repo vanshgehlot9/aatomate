@@ -11,13 +11,24 @@ function initAdmin() {
   }
   
   try {
-    const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+    let serviceAccount;
+    // 1. Try to load from environment variable (Vercel)
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    } 
+    // 2. Fallback to local file (Local Development)
+    else if (fs.existsSync(serviceAccountPath)) {
+      serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+    } else {
+      console.warn("No Firebase Service Account found. Using default initialization.");
+      return admin.initializeApp();
+    }
+
     return admin.initializeApp({
       credential: admin.credential.cert(serviceAccount)
     });
   } catch (error) {
     console.error("Firebase Admin Initialization Error:", error);
-    // Fallback if file is missing (e.g., build time)
     return admin.initializeApp();
   }
 }
