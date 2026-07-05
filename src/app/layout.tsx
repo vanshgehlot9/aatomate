@@ -39,10 +39,18 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
+      <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-K3V7ZRE28P"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-K3V7ZRE28P');`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col font-sans selection:bg-action-green selection:text-midnight-ink relative bg-canvas-ice text-midnight-ink">
         {/* Global Noise Texture */}
         <div 
-          className="pointer-events-none fixed inset-0 z-[999] h-full w-full opacity-[0.03] mix-blend-overlay"
+          className="pointer-events-none fixed inset-0 z-[999] h-full w-full opacity-[0.02]"
           style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }} 
         />
         {children}

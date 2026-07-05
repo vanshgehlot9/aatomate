@@ -1,9 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Bot, User, CheckCircle2, Sparkles, MessageSquare, Database, ArrowUpRight, Check } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const chatSequence = [
   { id: 1, type: "user", text: "Hi, I need a WhatsApp bot for my real estate company.", delay: 1000 },
@@ -17,6 +17,8 @@ function PremiumBotVisual() {
   const [visibleMessages, setVisibleMessages] = useState<typeof chatSequence>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showCRMCard, setShowCRMCard] = useState(false);
+  const visualRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(visualRef, { margin: "200px 0px 200px 0px" });
 
   useEffect(() => {
     let isActive = true;
@@ -46,19 +48,21 @@ function PremiumBotVisual() {
 
       if (isActive) {
         await new Promise((r) => setTimeout(r, 5000));
-        runSequence();
+        if (isActive) runSequence();
       }
     };
 
-    runSequence();
+    if (isInView) {
+      runSequence();
+    }
 
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [isInView]);
 
   return (
-    <div className="relative w-full aspect-[4/5] lg:aspect-[1/1.1] flex items-center justify-center perspective-1000">
+    <div ref={visualRef} className="relative w-full aspect-[4/5] lg:aspect-[1/1.1] flex items-center justify-center perspective-1000">
       
       {/* Optimized Background Glows */}
       <div 

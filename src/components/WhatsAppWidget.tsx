@@ -121,7 +121,7 @@ export default function WhatsAppWidget() {
         onClick={() => setIsOpen(!isOpen)}
         className="relative group w-[64px] h-[64px] bg-[#25D366] hover:bg-[#20bd5a] rounded-full flex items-center justify-center shadow-[0_10px_40px_rgba(37,211,102,0.4)] transition-all duration-300 hover:scale-105"
       >
-        <div className="absolute inset-0 rounded-full border-2 border-[#25D366] animate-ping opacity-50"></div>
+        {!isOpen && <div className="absolute inset-0 rounded-full border-2 border-[#25D366] animate-ping opacity-50"></div>}
         {isOpen ? (
           <X className="w-[32px] h-[32px] text-white relative z-10" />
         ) : (

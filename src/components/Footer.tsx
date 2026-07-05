@@ -57,7 +57,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-[48px] py-[64px]">
           
           {/* Contact Info */}
-          <div className="lg:col-span-4 flex flex-col gap-[24px]">
+          <div className="lg:col-span-3 flex flex-col gap-[24px]">
             <h4 className="font-mono text-[11px] uppercase text-white font-bold tracking-widest mb-[8px]">Contact Info</h4>
             
             <div className="flex items-center gap-[16px]">
@@ -99,6 +99,15 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Products */}
+          <div className="lg:col-span-2">
+            <h4 className="font-mono text-[11px] uppercase text-white font-bold tracking-widest mb-[32px]">Products</h4>
+            <ul className="flex flex-col gap-[16px]">
+              <li><Link href="/products/doctor-bot" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">Hospital Bot</Link></li>
+              <li><Link href="/products/hotel-bot" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">Hotel Bot</Link></li>
+            </ul>
+          </div>
+
           {/* Company */}
           <div className="lg:col-span-2">
             <h4 className="font-mono text-[11px] uppercase text-white font-bold tracking-widest mb-[32px]">Company</h4>
@@ -110,7 +119,7 @@ export default function Footer() {
           </div>
 
           {/* Legal & Policy Box */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-3">
             <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-[32px] h-full flex flex-col justify-center">
               <div className="flex items-center gap-[12px] mb-[32px]">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbff00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

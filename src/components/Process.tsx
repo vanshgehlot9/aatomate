@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { Webhook, BrainCircuit, DatabaseZap, Rocket, Activity, GitCommit, ChevronRight, BarChart3, Globe } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -40,9 +40,12 @@ export default function Process() {
   const [isHovered, setIsHovered] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-play tabs every 6 seconds, pause on hover
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef, { amount: 0.1 });
+
+  // Auto-play tabs every 6 seconds, pause on hover or when out of view
   useEffect(() => {
-    if (isHovered) {
+    if (isHovered || !isInView) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
@@ -54,13 +57,13 @@ export default function Process() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isHovered]);
+  }, [isHovered, isInView]);
 
   return (
-    <section id="process" className="py-16 lg:py-32 bg-[#050505] border-y border-white/5 relative overflow-hidden">
+    <section id="process" ref={sectionRef} className="py-16 lg:py-32 bg-[#050505] border-y border-white/5 relative overflow-hidden">
       
       {/* Background Texture & Floating Glow */}
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02] mix-blend-overlay pointer-events-none" />
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02] pointer-events-none" />
       
       <div 
         className="absolute top-1/4 right-1/4 w-[800px] h-[800px] pointer-events-none" 

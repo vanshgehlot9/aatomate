@@ -1,13 +1,16 @@
+import dynamic from 'next/dynamic';
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import Services from "@/components/Services";
-import Process from "@/components/Process";
-import Pricing from "@/components/Pricing";
-import Results from "@/components/Results";
-import Testimonials from "@/components/Testimonials";
-import FAQ from "@/components/FAQ";
-import Footer from "@/components/Footer";
-import WhatsAppWidget from "@/components/WhatsAppWidget";
+
+const Services = dynamic(() => import("@/components/Services"));
+const Process = dynamic(() => import("@/components/Process"));
+const Pricing = dynamic(() => import("@/components/Pricing"));
+const Results = dynamic(() => import("@/components/Results"));
+const Products = dynamic(() => import("@/components/Products"));
+const Testimonials = dynamic(() => import("@/components/Testimonials"));
+const FAQ = dynamic(() => import("@/components/FAQ"));
+const Footer = dynamic(() => import("@/components/Footer"));
+const WhatsAppWidget = dynamic(() => import("@/components/WhatsAppWidget"));
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -66,6 +69,7 @@ export default async function Home() {
       <Services services={services || []} />
       <Process />
       <Results useCases={useCases || []} caseStudies={caseStudies || []} />
+      <Products />
       <Testimonials testimonials={testimonials || []} />
       <Pricing plans={mappedPlans} />
       <FAQ faqs={faqs || []} />

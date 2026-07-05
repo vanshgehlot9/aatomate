@@ -62,7 +62,7 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
     {
       header: "Date Added",
       accessorKey: "created_at",
-      cell: (lead) => new Date(lead.created_at).toLocaleDateString()
+      cell: (lead) => new Date(lead.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
     },
   ];
 

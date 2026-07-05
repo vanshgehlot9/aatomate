@@ -26,7 +26,7 @@ export default function Services({ services = [] }: { services?: ServiceType[] }
   return (
     <section id="services" className="relative py-32 px-4 sm:px-6 lg:px-8 bg-[#030303] text-paper-white mt-12 rounded-[48px] lg:rounded-[64px] mx-2 lg:mx-4 overflow-hidden border border-white/5">
       {/* Background ambient glow */}
-      <div className="absolute top-0 right-0 w-full h-[800px] bg-gradient-to-b from-[#fbff00]/5 via-transparent to-transparent opacity-60 pointer-events-none mix-blend-screen" />
+      <div className="absolute top-0 right-0 w-full h-[800px] bg-gradient-to-b from-[#fbff00]/5 via-transparent to-transparent opacity-30 pointer-events-none" />
       
       <div className="max-w-7xl mx-auto relative z-10">
         
@@ -60,7 +60,7 @@ export default function Services({ services = [] }: { services?: ServiceType[] }
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="w-full rounded-[32px] md:rounded-[48px] bg-gradient-to-br from-[#111111] to-[#050505] border border-white/10 overflow-hidden mb-8 grid grid-cols-1 lg:grid-cols-2 shadow-2xl relative"
         >
-          <div className="absolute inset-0 bg-[#fbff00]/5 opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none mix-blend-overlay" />
+          <div className="absolute inset-0 bg-[#fbff00]/5 opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
           
           {/* Left Text */}
           <div className="p-10 md:p-16 flex flex-col justify-center relative z-10 border-b lg:border-b-0 lg:border-r border-white/5">
@@ -85,7 +85,7 @@ export default function Services({ services = [] }: { services?: ServiceType[] }
           {/* Right Integration Node Map */}
           <div className="relative bg-[#050505] p-8 md:p-12 overflow-hidden min-h-[400px] flex items-center justify-center border-l border-white/5">
             {/* Background Grid & Glows */}
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02] pointer-events-none" />
             {/* Optimized Background Glows */}
             <div 
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none" 
