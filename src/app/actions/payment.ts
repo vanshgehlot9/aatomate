@@ -1,11 +1,21 @@
 "use server";
 
 import Razorpay from "razorpay";
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
+
+// Use Admin Client to bypass RLS for server-side payment logic
+function getAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  if (!key) throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
+  return createSupabaseClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false }
+  });
+}
 
 // Initialize Razorpay
-// Using exclamation marks assuming they will be set in production.
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_mock",
   key_secret: process.env.RAZORPAY_KEY_SECRET || "rzp_test_secret_mock",
@@ -13,7 +23,7 @@ const razorpay = new Razorpay({
 
 export async function createRazorpayOrder(planId: string, amount: number) {
   try {
-    const supabase = await createClient();
+    const supabase = getAdminClient();
 
     // 1. Create Razorpay Order
     const options = {
@@ -72,7 +82,7 @@ export async function verifyRazorpayPayment(
       return { error: "Invalid payment signature" };
     }
 
-    const supabase = await createClient();
+    const supabase = getAdminClient();
 
     // Update payment record
     const { error } = await supabase
@@ -96,11 +106,9 @@ export async function verifyRazorpayPayment(
   }
 }
 
-import jwt from "jsonwebtoken";
-
 export async function generateOnboardingToken(razorpay_order_id: string) {
   try {
-    const supabase = await createClient();
+    const supabase = getAdminClient();
 
     // 1. Fetch the payment record to ensure it is captured
     const { data: payment, error } = await supabase
