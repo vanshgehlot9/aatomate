@@ -45,7 +45,7 @@ export default function Pricing({ plans = [] }: { plans?: PricingPlan[] }) {
           return;
         }
 
-        const res = await createRazorpayOrder(plan.id, plan.monthly_price);
+        const res = await createRazorpayOrder(plan.id, plan.monthly_price || 0);
         
         if (res.error) {
           alert(res.error);
