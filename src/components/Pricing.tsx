@@ -1,9 +1,12 @@
 "use client";
 
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { CheckCircle2, ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
+import { createRazorpayOrder, verifyRazorpayPayment, generateOnboardingToken } from "@/app/actions/payment";
+
 
 import { Database } from "@/lib/types/supabase";
 
@@ -12,7 +15,90 @@ type PricingPlan = Database['public']['Tables']['pricing_plans']['Row'] & {
 }
 
 export default function Pricing({ plans = [] }: { plans?: PricingPlan[] }) {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "onetime">("onetime");
+  const router = useRouter();
+  const [isProcessing, startTransition] = useTransition();
+  const [activePlanId, setActivePlanId] = useState<string | null>(null);
+
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleGetStarted = (plan: PricingPlan) => {
+    if (!plan.monthly_price) {
+      router.push('/contact');
+      return;
+    }
+
+    setActivePlanId(plan.id);
+    startTransition(async () => {
+      try {
+        const isLoaded = await loadRazorpay();
+        if (!isLoaded) {
+          alert("Failed to load Razorpay SDK");
+          setActivePlanId(null);
+          return;
+        }
+
+        const res = await createRazorpayOrder(plan.id, plan.monthly_price);
+        
+        if (res.error) {
+          alert(res.error);
+          setActivePlanId(null);
+          return;
+        }
+
+        const options = {
+          key: res.keyId,
+          amount: res.amount,
+          currency: "INR",
+          name: "Aatomate",
+          description: `Subscription for ${plan.plan_name}`,
+          order_id: res.orderId,
+          handler: async function (response: any) {
+            const verifyRes = await verifyRazorpayPayment(
+              response.razorpay_payment_id,
+              response.razorpay_order_id,
+              response.razorpay_signature
+            );
+
+            if (verifyRes.success) {
+              const tokenRes = await generateOnboardingToken(response.razorpay_order_id);
+              if (tokenRes.success) {
+                const clinicUrl = process.env.NEXT_PUBLIC_CLINIC_URL || 'http://localhost:3001';
+                window.location.href = `${clinicUrl}/onboarding?token=${tokenRes.token}`;
+              } else {
+                alert("Failed to create secure onboarding session: " + tokenRes.error);
+                setActivePlanId(null);
+              }
+            } else {
+              alert("Payment verification failed. Please contact support.");
+            }
+          },
+          theme: {
+            color: "#fbff00",
+          },
+          modal: {
+            ondismiss: function() {
+              setActivePlanId(null);
+            }
+          }
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
+      } catch (err) {
+        console.error(err);
+        alert("An unexpected error occurred.");
+        setActivePlanId(null);
+      }
+    });
+  };
 
   return (
     <section id="pricing" className="py-32 relative overflow-hidden bg-paper-white">
@@ -25,49 +111,7 @@ export default function Pricing({ plans = [] }: { plans?: PricingPlan[] }) {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-24 md:mb-32 relative z-30">
-
-          {/* Animated Toggle */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center justify-center"
-          >
-            <div className="bg-[#111111] border border-white/10 p-1.5 rounded-full flex gap-1 relative z-10 shadow-2xl">
-              <button
-                onClick={() => setBillingCycle("monthly")}
-                className={`relative px-6 py-3 rounded-full text-sm font-bold uppercase tracking-wider transition-colors z-20 ${
-                  billingCycle === "monthly" ? "text-black" : "text-white/60 hover:text-white"
-                }`}
-              >
-                {billingCycle === "monthly" && (
-                  <motion.div
-                    layoutId="pricing-pill"
-                    className="absolute inset-0 bg-[#fbff00] rounded-full -z-10 shadow-[0_0_20px_rgba(251,255,0,0.3)]"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                Pay Monthly
-              </button>
-              <button
-                onClick={() => setBillingCycle("onetime")}
-                className={`relative px-6 py-3 rounded-full text-sm font-bold uppercase tracking-wider transition-colors z-20 ${
-                  billingCycle === "onetime" ? "text-black" : "text-white/60 hover:text-white"
-                }`}
-              >
-                {billingCycle === "onetime" && (
-                  <motion.div
-                    layoutId="pricing-pill"
-                    className="absolute inset-0 bg-[#fbff00] rounded-full -z-10 shadow-[0_0_20px_rgba(251,255,0,0.3)]"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                Pay Once (Lifetime)
-              </button>
-            </div>
-          </motion.div>
+        <div className="text-center max-w-3xl mx-auto mb-16 md:mb-24 relative z-30">
         </div>
 
         <div 
@@ -76,8 +120,8 @@ export default function Pricing({ plans = [] }: { plans?: PricingPlan[] }) {
         >
           {plans.map((plan, index) => {
             const isYellow = plan.popular;
-            const currentPrice = billingCycle === "monthly" ? plan.monthly_price : plan.yearly_price;
-            const currentSubtext = billingCycle === "monthly" ? "/ month" : "/ year";
+            const currentPrice = plan.monthly_price;
+            const currentSubtext = "/ month";
             const priceDisplay = currentPrice ? `₹${currentPrice.toLocaleString('en-IN')}` : "Custom";
             const currentOnboarding = plan.setup_fee || "Onboarding included";
             
@@ -91,57 +135,55 @@ export default function Pricing({ plans = [] }: { plans?: PricingPlan[] }) {
                   whileHover={{ y: -10 }}
                   className={`relative p-8 md:p-10 lg:p-12 rounded-[32px] md:rounded-[40px] flex flex-col h-full shrink-0 w-[80vw] sm:w-[320px] lg:w-auto snap-center transition-all duration-500 ${
                     isYellow 
-                      ? "bg-gradient-to-br from-[#fbff00] to-[#e5e800] text-black shadow-[0_0_80px_rgba(251,255,0,0.15)] lg:scale-105 z-10 border border-[#fbff00]" 
+                      ? "bg-[#161616] text-white shadow-[0_0_60px_rgba(251,255,0,0.15)] lg:scale-105 z-10 border-2 border-[#fbff00]" 
                       : "bg-[#111111] text-white shadow-2xl border border-white/10"
                   }`}
                 >
                 {/* Popular Badge */}
                 {plan.popular && (
-                  <div className="absolute top-0 right-0 w-32 h-32 overflow-hidden rounded-tr-[40px]">
-                    <div className="absolute top-6 -right-8 w-40 bg-black text-[#fbff00] font-mono text-[10px] font-bold uppercase tracking-[0.2em] py-2 text-center transform rotate-45 shadow-lg">
-                      MOST POPULAR
+                  <div className="absolute top-0 right-0 w-32 h-32 overflow-hidden rounded-tr-[38px]">
+                    <div className="absolute top-6 -right-8 w-40 bg-[#fbff00] text-black font-mono text-[10px] font-bold uppercase tracking-[0.2em] py-2 text-center transform rotate-45 shadow-lg">
+                      {plan.badge_text || "MOST POPULAR"}
                     </div>
                   </div>
                 )}
 
                 <div className="mb-6 lg:mb-8">
-                  <h3 className={`font-mono text-[12px] lg:text-[13px] font-bold tracking-[0.2em] mb-3 lg:mb-4 ${isYellow ? "text-black/60" : "text-white/50"}`}>
-                    {plan.name}
+                  <h3 className={`font-mono text-[12px] lg:text-[13px] font-bold tracking-[0.2em] mb-3 lg:mb-4 ${isYellow ? "text-[#fbff00]" : "text-white/50"}`}>
+                    {plan.plan_name}
                   </h3>
-                  <p className={`text-[16px] md:text-[20px] font-medium leading-[1.4] pr-4 lg:pr-8 ${isYellow ? "text-black" : "text-white"}`}>
-                    Perfect for businesses looking to scale.
+                  <p className="text-[16px] md:text-[18px] font-medium leading-[1.5] pr-4 lg:pr-8 text-white/80">
+                    {plan.description || "Perfect for businesses looking to scale."}
                   </p>
                 </div>
 
                 <div className="mb-8 lg:mb-10">
                   <div className="flex flex-col xl:flex-row xl:items-baseline gap-1 xl:gap-3 mb-4">
-                    <div className="font-display text-[48px] md:text-[64px] lg:text-[72px] leading-[1] tracking-[-0.03em]">
+                    <div className="font-display text-[48px] md:text-[64px] lg:text-[72px] leading-[1] tracking-[-0.03em] text-white">
                       {priceDisplay}
                     </div>
-                    <span className={`font-mono text-[11px] uppercase tracking-widest font-bold ${isYellow ? "text-black/50" : "text-white/40"}`}>
+                    <span className="font-mono text-[11px] uppercase tracking-widest font-bold text-white/40">
                       {currentSubtext}
                     </span>
                   </div>
                   
                   <div
-                    className={`inline-block px-3 py-1.5 rounded-lg text-[10px] md:text-[11px] font-bold uppercase tracking-wider ${
-                      isYellow ? "bg-black/10 text-black/70" : "bg-white/10 text-white/70"
-                    }`}
+                    className="inline-block px-3 py-1.5 rounded-lg text-[10px] md:text-[11px] font-bold uppercase tracking-wider bg-white/5 text-white/70"
                   >
                     {currentOnboarding}
                   </div>
                 </div>
 
-                <div className={`w-full h-[1px] mb-10 ${isYellow ? "bg-black/10" : "bg-white/10"}`} />
+                <div className="w-full h-[1px] mb-10 bg-white/10" />
 
                 <div className="flex-grow mb-8 lg:mb-12">
                   <ul className="space-y-4 lg:space-y-5">
                     {plan.features.map((feature, i) => (
                       <li key={feature.id} className="flex items-start gap-3 lg:gap-4">
-                        <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${isYellow ? "bg-black/10" : "bg-white/10"}`}>
-                          <CheckCircle2 className={`w-3.5 h-3.5 ${isYellow ? "text-black" : "text-[#fbff00]"}`} />
+                        <div className="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 bg-[#fbff00]/10">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#fbff00]" />
                         </div>
-                        <span className={`text-[14px] lg:text-[15px] font-medium leading-relaxed ${isYellow ? "text-black/80" : "text-white/80"}`}>
+                        <span className="text-[14px] lg:text-[15px] font-medium leading-relaxed text-white/90">
                           {feature.feature_text}
                         </span>
                       </li>
@@ -149,17 +191,24 @@ export default function Pricing({ plans = [] }: { plans?: PricingPlan[] }) {
                   </ul>
                 </div>
 
-                <Link
-                  href="#contact"
-                  className={`group w-full py-5 px-6 text-center font-bold text-[15px] uppercase tracking-wider rounded-full transition-all duration-300 flex items-center justify-center gap-3 mt-auto ${
+                <button
+                  onClick={() => handleGetStarted(plan)}
+                  disabled={isProcessing && activePlanId === plan.id}
+                  className={`group w-full py-5 px-6 text-center font-bold text-[15px] uppercase tracking-wider rounded-full transition-all duration-300 flex items-center justify-center gap-3 mt-auto disabled:opacity-70 ${
                     isYellow
-                      ? "bg-black text-[#fbff00] hover:shadow-[0_0_30px_rgba(0,0,0,0.3)] hover:scale-[1.02]"
+                      ? "bg-[#fbff00] text-black hover:shadow-[0_0_30px_rgba(251,255,0,0.4)] hover:bg-white hover:scale-[1.02]"
                       : "bg-white text-black hover:bg-[#fbff00] hover:scale-[1.02]"
                   }`}
                 >
-                  {plan.cta_text || "GET STARTED"}
-                  <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1.5" />
-                </Link>
+                  {isProcessing && activePlanId === plan.id ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      {plan.cta_text || "GET STARTED"}
+                      <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1.5" />
+                    </>
+                  )}
+                </button>
               </motion.div>
             );
           })}

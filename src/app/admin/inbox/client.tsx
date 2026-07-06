@@ -1,11 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Send, Loader2, Phone } from "lucide-react";
 import { sendWhatsAppMessage } from "./actions";
+import { useSearchParams, useRouter } from "next/navigation";
 
-export default function InboxClient({ initialChats }: { initialChats: any[] }) {
-  const [activeChatId, setActiveChatId] = useState<string | null>(initialChats.length > 0 ? initialChats[0].id : null);
+function InboxContent({ initialChats }: { initialChats: any[] }) {
+  const searchParams = useSearchParams();
+  const queryChatId = searchParams.get("chatId");
+  const router = useRouter();
+
+  const [activeChatId, setActiveChatId] = useState<string | null>(
+    queryChatId || (initialChats.length > 0 ? initialChats[0].id : null)
+  );
+
+  useEffect(() => {
+    if (queryChatId) {
+      setActiveChatId(queryChatId);
+      // clean up URL so refreshing doesn't stick to it
+      router.replace('/admin/inbox');
+    }
+  }, [queryChatId, router]);
   const [replyMessage, setReplyMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
 
@@ -120,5 +135,13 @@ export default function InboxClient({ initialChats }: { initialChats: any[] }) {
         )}
       </div>
     </div>
+  );
+}
+
+export default function InboxClient({ initialChats }: { initialChats: any[] }) {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-500">Loading inbox...</div>}>
+      <InboxContent initialChats={initialChats} />
+    </Suspense>
   );
 }

@@ -121,9 +121,15 @@ export default function ContactPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
-                      <label htmlFor="company" className="font-mono text-[10px] uppercase text-white/50 tracking-widest font-bold">Company Name</label>
-                      <input type="text" id="company" name="company" className="bg-white/5 border border-white/10 rounded-xl px-4 h-[52px] text-white placeholder-white/20 focus:outline-none focus:border-[#fbff00]/50 focus:bg-white/10 transition-all font-medium text-[15px]" placeholder="Acme Corp" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="company" className="font-mono text-[10px] uppercase text-white/50 tracking-widest font-bold">Company Name</label>
+                        <input type="text" id="company" name="company" className="bg-white/5 border border-white/10 rounded-xl px-4 h-[52px] text-white placeholder-white/20 focus:outline-none focus:border-[#fbff00]/50 focus:bg-white/10 transition-all font-medium text-[15px]" placeholder="Acme Corp" />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="phone" className="font-mono text-[10px] uppercase text-white/50 tracking-widest font-bold">Mobile Number</label>
+                        <input type="tel" id="phone" name="phone" className="bg-white/5 border border-white/10 rounded-xl px-4 h-[52px] text-white placeholder-white/20 focus:outline-none focus:border-[#fbff00]/50 focus:bg-white/10 transition-all font-medium text-[15px]" placeholder="+91 98765 43210" />
+                      </div>
                     </div>
 
                     <div className="flex flex-col gap-1.5">

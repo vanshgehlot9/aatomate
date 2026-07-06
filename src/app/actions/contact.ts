@@ -7,6 +7,7 @@ export async function submitContactForm(formData: FormData) {
     const data = {
       name: formData.get("name") as string,
       email: formData.get("email") as string,
+      phone: formData.get("phone") as string,
       company: formData.get("company") as string,
       service: formData.get("service") as string,
       message: formData.get("message") as string,
@@ -22,6 +23,7 @@ export async function submitContactForm(formData: FormData) {
     const { error } = await supabase.from('leads').insert([{
       name: data.name,
       email: data.email,
+      phone: data.phone,
       company_name: data.company,
       service_interested: data.service,
       notes: data.message,

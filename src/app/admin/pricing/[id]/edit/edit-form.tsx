@@ -3,20 +3,26 @@
 import { useState } from "react";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { createPricingPlan } from "../actions";
+import { updatePricingPlan } from "../../actions";
+import { Database } from "@/lib/types/supabase";
 
-export default function CreatePricingPlanPage() {
+type Plan = Database["public"]["Tables"]["pricing_plans"]["Row"];
+type Feature = Database["public"]["Tables"]["pricing_features"]["Row"];
+
+export default function EditForm({ plan, features }: { plan: Plan; features: Feature[] }) {
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
     try {
-      await createPricingPlan(formData);
+      await updatePricingPlan(plan.id, formData);
     } catch (error) {
       console.error(error);
       setLoading(false);
     }
   }
+
+  const featuresText = features.map(f => f.feature_text).join("\n");
 
   return (
     <form action={handleSubmit} className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
@@ -27,13 +33,13 @@ export default function CreatePricingPlanPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">New Pricing Plan</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Add a new subscription tier</p>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Edit Pricing Plan</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Update subscription tier details</p>
           </div>
         </div>
         <button type="submit" disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm shadow-blue-500/20 disabled:opacity-70">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          Save Plan
+          Save Changes
         </button>
       </div>
 
@@ -46,6 +52,7 @@ export default function CreatePricingPlanPage() {
             type="text"
             name="name"
             required
+            defaultValue={plan.plan_name}
             placeholder="e.g. Starter, Growth, Enterprise"
             className="w-full px-4 py-2 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
           />
@@ -56,6 +63,7 @@ export default function CreatePricingPlanPage() {
           <input
             type="text"
             name="description"
+            defaultValue={plan.description || ""}
             placeholder="e.g. Perfect for businesses looking to scale."
             className="w-full px-4 py-2 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
           />
@@ -67,18 +75,18 @@ export default function CreatePricingPlanPage() {
             <input
               type="number"
               name="monthly_price"
+              defaultValue={plan.monthly_price || ""}
               placeholder="Leave blank for Custom pricing"
               className="w-full px-4 py-2 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
-
-
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Setup Fee</label>
             <input
               type="text"
               name="setup_fee"
+              defaultValue={plan.setup_fee || ""}
               placeholder="e.g. ₹50k one-time"
               className="w-full px-4 py-2 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
             />
@@ -90,7 +98,7 @@ export default function CreatePricingPlanPage() {
               type="text"
               name="cta_text"
               placeholder="e.g. Get Started, Book Demo"
-              defaultValue="Get Started"
+              defaultValue={plan.cta_text || "Get Started"}
               className="w-full px-4 py-2 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
@@ -101,7 +109,7 @@ export default function CreatePricingPlanPage() {
           <input
             type="number"
             name="display_order"
-            defaultValue="0"
+            defaultValue={plan.display_order ?? 0}
             className="w-full px-4 py-2 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
           />
         </div>
@@ -112,6 +120,7 @@ export default function CreatePricingPlanPage() {
               type="checkbox"
               name="popular"
               id="popular"
+              defaultChecked={plan.popular || false}
               className="w-4 h-4 text-blue-600 bg-gray-50 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
             />
             <label htmlFor="popular" className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -125,7 +134,7 @@ export default function CreatePricingPlanPage() {
               type="text"
               name="badge_text"
               placeholder="e.g. MOST POPULAR"
-              defaultValue="MOST POPULAR"
+              defaultValue={plan.badge_text || "MOST POPULAR"}
               className="w-full px-4 py-2 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
@@ -136,6 +145,7 @@ export default function CreatePricingPlanPage() {
           <textarea
             name="features"
             rows={5}
+            defaultValue={featuresText}
             placeholder="e.g.&#10;5 User Accounts&#10;100GB Storage&#10;Priority Support"
             className="w-full px-4 py-2 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors resize-y"
           />

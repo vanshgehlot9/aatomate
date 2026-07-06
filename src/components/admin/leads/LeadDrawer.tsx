@@ -3,6 +3,9 @@
 import { X, Mail, Phone, Building, Calendar, Edit3, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
+import { useState, useTransition, useEffect } from "react";
+import { scheduleLeadDemo, getOrCreateWhatsAppChat } from "@/app/admin/leads/actions";
+import { useRouter } from "next/navigation";
 
 interface LeadDrawerProps {
   isOpen: boolean;
@@ -11,6 +14,55 @@ interface LeadDrawerProps {
 }
 
 export default function LeadDrawer({ isOpen, onClose, lead }: LeadDrawerProps) {
+  const router = useRouter();
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [demoDate, setDemoDate] = useState("");
+  const [demoTime, setDemoTime] = useState("");
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (!isOpen) {
+      setIsScheduling(false);
+      setDemoDate("");
+      setDemoTime("");
+    }
+  }, [isOpen]);
+
+  const handleWhatsAppMessage = () => {
+    if (!lead.phone) {
+      alert("No phone number provided for this lead.");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const chatId = await getOrCreateWhatsAppChat(lead.id, lead.phone);
+        router.push(`/admin/inbox?chatId=${chatId}`);
+        onClose();
+      } catch (error) {
+        console.error(error);
+        alert("Failed to prepare WhatsApp chat.");
+      }
+    });
+  };
+
+  const handleScheduleConfirm = () => {
+    if (!demoDate || !demoTime) {
+      alert("Please select both date and time");
+      return;
+    }
+    startTransition(async () => {
+      try {
+        await scheduleLeadDemo(lead.id, demoDate, demoTime);
+        alert("Demo scheduled successfully!");
+        onClose();
+      } catch (error) {
+        console.error(error);
+        alert("Failed to schedule demo");
+      }
+    });
+  };
+
   if (!lead) return null;
 
   return (
@@ -128,14 +180,58 @@ export default function LeadDrawer({ isOpen, onClose, lead }: LeadDrawerProps) {
             </div>
 
             {/* Footer Actions */}
-            <div className="p-6 border-t border-gray-200 dark:border-[#1F1F1F] bg-gray-50/50 dark:bg-[#0A0A0A] flex gap-3">
-              <button className="flex-1 px-4 py-2 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] transition-colors flex items-center justify-center gap-2">
-                <MessageSquare className="w-4 h-4" />
-                Message
-              </button>
-              <button className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm shadow-blue-500/20">
-                Schedule Demo
-              </button>
+            <div className="p-6 border-t border-gray-200 dark:border-[#1F1F1F] bg-gray-50/50 dark:bg-[#0A0A0A]">
+              {isScheduling ? (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Schedule Demo</h4>
+                  <div className="flex gap-3">
+                    <input 
+                      type="date" 
+                      value={demoDate}
+                      onChange={(e) => setDemoDate(e.target.value)}
+                      className="flex-1 px-3 py-2 bg-white dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                    <input 
+                      type="time" 
+                      value={demoTime}
+                      onChange={(e) => setDemoTime(e.target.value)}
+                      className="flex-1 px-3 py-2 bg-white dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    <button 
+                      onClick={() => setIsScheduling(false)}
+                      disabled={isPending}
+                      className="flex-1 px-4 py-2 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={handleScheduleConfirm}
+                      disabled={isPending}
+                      className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm shadow-blue-500/20 disabled:opacity-50 flex items-center justify-center"
+                    >
+                      {isPending ? "Scheduling..." : "Confirm Demo"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <button 
+                    onClick={handleWhatsAppMessage}
+                    className="flex-1 px-4 py-2 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] transition-colors flex items-center justify-center gap-2"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    WhatsApp
+                  </button>
+                  <button 
+                    onClick={() => setIsScheduling(true)}
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm shadow-blue-500/20"
+                  >
+                    Schedule Demo
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         </>

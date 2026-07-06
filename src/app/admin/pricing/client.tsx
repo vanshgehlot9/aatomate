@@ -1,23 +1,40 @@
 "use client";
 
 import DataTable, { Column } from "@/components/admin/DataTable";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
 import { Database } from "@/lib/types/supabase";
+import { useTransition } from "react";
+import { deletePricingPlan } from "./actions";
 
 type PricingPlan = Database['public']['Tables']['pricing_plans']['Row'] & {
   features: Database['public']['Tables']['pricing_features']['Row'][]
 }
 
 export default function PricingClient({ initialPlans }: { initialPlans: PricingPlan[] }) {
+  const [isPending, startTransition] = useTransition();
+
+  const handleDelete = (id: string) => {
+    if (window.confirm("Are you sure you want to delete this plan?")) {
+      startTransition(async () => {
+        try {
+          await deletePricingPlan(id);
+        } catch (error) {
+          console.error(error);
+          alert("Failed to delete plan");
+        }
+      });
+    }
+  };
+
   const columns: Column<PricingPlan>[] = [
     {
       header: "Plan Name",
-      accessorKey: "name",
+      accessorKey: "plan_name",
       cell: (plan) => (
         <div className="flex items-center gap-2">
-          <span className="font-medium text-gray-900 dark:text-white">{plan.name}</span>
+          <span className="font-medium text-gray-900 dark:text-white">{plan.plan_name}</span>
           {plan.popular && (
             <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded dark:bg-blue-900/30 dark:text-blue-300">
               POPULAR
@@ -27,14 +44,9 @@ export default function PricingClient({ initialPlans }: { initialPlans: PricingP
       )
     },
     {
-      header: "Monthly",
+      header: "Price",
       accessorKey: "monthly_price",
       cell: (plan) => plan.monthly_price ? `₹${plan.monthly_price.toLocaleString('en-IN')}` : "Custom"
-    },
-    {
-      header: "Yearly",
-      accessorKey: "yearly_price",
-      cell: (plan) => plan.yearly_price ? `₹${plan.yearly_price.toLocaleString('en-IN')}` : "Custom"
     },
     {
       header: "Features",
@@ -47,10 +59,14 @@ export default function PricingClient({ initialPlans }: { initialPlans: PricingP
       sortable: false,
       cell: (plan) => (
         <div className="flex items-center gap-3">
-          <button className="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+          <Link href={`/admin/pricing/${plan.id}/edit`} className="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
             <Edit2 className="w-4 h-4" />
-          </button>
-          <button className="text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+          </Link>
+          <button 
+            onClick={() => handleDelete(plan.id)}
+            disabled={isPending}
+            className="text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+          >
             <Trash2 className="w-4 h-4" />
           </button>
         </div>

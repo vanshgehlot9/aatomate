@@ -187,7 +187,9 @@ export type Database = {
       pricing_plans: {
         Row: {
           id: string
-          name: string
+          plan_name: string
+          description: string | null
+          badge_text: string | null
           monthly_price: number | null
           yearly_price: number | null
           setup_fee: string | null
@@ -198,7 +200,9 @@ export type Database = {
         }
         Insert: {
           id?: string
-          name: string
+          plan_name: string
+          description?: string | null
+          badge_text?: string | null
           monthly_price?: number | null
           yearly_price?: number | null
           setup_fee?: string | null
@@ -209,7 +213,9 @@ export type Database = {
         }
         Update: {
           id?: string
-          name?: string
+          plan_name?: string
+          description?: string | null
+          badge_text?: string | null
           monthly_price?: number | null
           yearly_price?: number | null
           setup_fee?: string | null
