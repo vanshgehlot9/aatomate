@@ -4,7 +4,7 @@ import json
 
 # Setup OpenAI client
 # Ensure OPENAI_API_KEY is in your environment variables
-client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY", "dummy_key_to_prevent_startup_crash"))
 
 SYSTEM_PROMPT = """
 You are a Professional Automation Consultant and Friendly Sales Representative for Aatomate, an AI and business automation company.
