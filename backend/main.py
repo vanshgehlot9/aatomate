@@ -70,64 +70,83 @@ async def receive_whatsapp_message(payload: WhatsAppWebhookPayload, background_t
 
 async def handle_incoming_message(phone_number: str, message_text: str):
     """
-    Background task to handle the database logic and AI response.
+    Background task to handle the database logic and AI response using Supabase.
     """
     print(f"Handling message from {phone_number}: {message_text}")
     
-    leads_ref = db.collection("leads")
-    lead_query = leads_ref.where("phone_number", "==", phone_number).limit(1).stream()
+    # 1. Fetch or create Lead
+    lead_response = db.table("leads").select("*").eq("phone", phone_number).execute()
+    leads_data = lead_response.data
     
-    lead_doc = None
-    for doc in lead_query:
-        lead_doc = doc
-        break
-
-    if not lead_doc:
-        # Create a new lead
-        lead_data = {
-            "phone_number": phone_number,
-            "status": "New",
-            "score": "Cold",
-            "created_at": datetime.now()
-        }
-        lead_ref = leads_ref.document()
-        lead_ref.set(lead_data)
-        lead_id = lead_ref.id
+    if not leads_data:
+        # Create a new lead (using dummy email since it's NOT NULL in schema)
+        lead_insert = db.table("leads").insert({
+            "name": f"WhatsApp Lead {phone_number}",
+            "email": f"{phone_number}@whatsapp.lead",
+            "phone": phone_number,
+            "status": "new",
+            "notes": "Created from WhatsApp Webhook"
+        }).execute()
+        lead_id = lead_insert.data[0]["id"]
     else:
-        lead_ref = lead_doc.reference
-        lead_id = lead_doc.id
+        lead_id = leads_data[0]["id"]
 
-    # Add the user's message to the chats sub-collection
-    chats_ref = lead_ref.collection("chats")
-    chats_ref.add({
-        "role": "user",
-        "content": message_text,
-        "timestamp": datetime.now()
-    })
+    # 2. Fetch or create WhatsApp Chat session
+    chat_response = db.table("whatsapp_chats").select("*").eq("phone_number", phone_number).execute()
+    chats_data = chat_response.data
 
-    # Retrieve recent chat history to give context to OpenAI
-    recent_chats = chats_ref.order_by("timestamp").limit(20).stream()
-    chat_history = [{"role": c.to_dict()["role"], "content": c.to_dict()["content"]} for c in recent_chats]
+    if not chats_data:
+        chat_insert = db.table("whatsapp_chats").insert({
+            "lead_id": lead_id,
+            "phone_number": phone_number,
+            "status": "active"
+        }).execute()
+        chat_id = chat_insert.data[0]["id"]
+    else:
+        chat_id = chats_data[0]["id"]
 
-    # Get AI Response
+    # 3. Add the user's message to whatsapp_messages
+    db.table("whatsapp_messages").insert({
+        "chat_id": chat_id,
+        "sender_type": "user",
+        "content": message_text
+    }).execute()
+
+    # 4. Retrieve recent chat history to give context to OpenAI
+    recent_msgs_response = db.table("whatsapp_messages")\
+        .select("*")\
+        .eq("chat_id", chat_id)\
+        .order("created_at", desc=True)\
+        .limit(20)\
+        .execute()
+    
+    # Reverse to get chronological order
+    recent_msgs = reversed(recent_msgs_response.data)
+    
+    chat_history = []
+    for msg in recent_msgs:
+        role = "user" if msg["sender_type"] == "user" else "assistant"
+        chat_history.append({"role": role, "content": msg["content"]})
+
+    # 5. Get AI Response
     ai_response = await process_message_with_ai(chat_history)
 
-    # Save AI response to Firestore
-    chats_ref.add({
-        "role": "assistant",
-        "content": ai_response,
-        "timestamp": datetime.now()
-    })
+    # 6. Save AI response to whatsapp_messages
+    db.table("whatsapp_messages").insert({
+        "chat_id": chat_id,
+        "sender_type": "assistant",
+        "content": ai_response
+    }).execute()
 
     # TODO: Send the ai_response back to the user via Meta WhatsApp Graph API here.
     print(f"AI Response to {phone_number}: {ai_response}")
 
-    # If the conversation is getting long, trigger the summary/qualification generator
+    # 7. If the conversation is getting long, trigger the summary/qualification generator
     if len(chat_history) % 5 == 0:
         summary_data = await generate_lead_summary(chat_history)
         if summary_data:
-            lead_ref.update({
+            db.table("leads").update({
                 "ai_summary": summary_data.get("summary", ""),
                 "score": summary_data.get("score", "Warm"),
                 "status": "Contacted"
-            })
+            }).eq("id", lead_id).execute()

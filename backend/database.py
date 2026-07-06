@@ -1,32 +1,18 @@
 import os
-import firebase_admin
-from firebase_admin import credentials, firestore
+from supabase import create_client, Client
 
-# Determine the absolute path to the Firebase Service Account JSON file.
-# The user provided it in the root directory.
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CREDENTIALS_PATH = os.path.join(BASE_DIR, "whatsapp-doctor-booking-firebase-adminsdk-fbsvc-6829c11a41.json")
+def get_supabase_client() -> Client:
+    # Render env vars or local .env
+    url = os.environ.get("SUPABASE_URL")
+    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
-import json
+    if not url or not key:
+        print("⚠️ Warning: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing!")
+        # Fallback for local development if needed, though they should be in .env
+        url = url or "https://placeholder-url.supabase.co"
+        key = key or "placeholder-key"
+        
+    return create_client(url, key)
 
-def init_firebase():
-    """Initializes the Firebase Admin SDK if it hasn't been initialized yet."""
-    if not firebase_admin._apps:
-        try:
-            env_cred = os.environ.get("FIREBASE_SERVICE_ACCOUNT_KEY")
-            if env_cred:
-                cred_dict = json.loads(env_cred)
-                cred = credentials.Certificate(cred_dict)
-            else:
-                cred = credentials.Certificate(CREDENTIALS_PATH)
-            
-            firebase_admin.initialize_app(cred)
-            print("✅ Firebase initialized successfully.")
-        except Exception as e:
-            print(f"❌ Failed to initialize Firebase: {e}")
-
-# Initialize it on import
-init_firebase()
-
-# Export a globally accessible Firestore client instance
-db = firestore.client()
+# Export a globally accessible Supabase client instance
+db = get_supabase_client()
