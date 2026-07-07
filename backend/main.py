@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
 import asyncio
+import os
 
 # Load environment variables first (if .env is used, though pydantic_settings handles it)
 from dotenv import load_dotenv
@@ -15,24 +16,60 @@ from app.services.webhook_sync import sync_webhook
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+import threading
+
+def _background_webhook_sync():
+    """
+    Background thread: waits for the server to be fully live,
+    then registers the webhook with Meta (with retries).
+    This MUST run outside lifespan because lifespan blocks the server
+    from accepting connections — Meta's verification probe would time out.
+    """
+    import time
+    import requests as _requests
+
+    # Wait for the server to be fully live and accepting connections
+    logger.info("[webhook_sync_bg] Waiting for server to be ready...")
+    for attempt in range(20):
+        time.sleep(3)
+        try:
+            port = os.environ.get("PORT", "8000")
+            resp = _requests.get(f"http://localhost:{port}/", timeout=2)
+            if resp.status_code == 200:
+                logger.info("[webhook_sync_bg] Server is live — starting webhook sync")
+                break
+        except Exception:
+            pass
+    else:
+        logger.warning("[webhook_sync_bg] Server didn't become ready in time, attempting sync anyway")
+
+    # Retry sync up to 3 times
+    for attempt in range(1, 4):
+        success = sync_webhook()
+        if success:
+            return
+        logger.warning(f"[webhook_sync_bg] Sync attempt {attempt}/3 failed, retrying in 10s...")
+        time.sleep(10)
+
+    logger.error("[webhook_sync_bg] All 3 sync attempts failed. Use POST /admin/sync-webhook to retry manually.")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     FastAPI lifespan — runs on startup and shutdown.
-    Automatically syncs the webhook URL with Meta on every boot.
+    Webhook sync is launched as a background THREAD (not awaited)
+    so the server can start accepting connections immediately.
     """
     # ── STARTUP ──
     logger.info("🚀 Aatomate API starting up...")
-    
-    # Run webhook sync in a thread to avoid blocking the event loop
-    # Small delay to let the server fully bind (important for ngrok detection)
-    await asyncio.sleep(2)
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, sync_webhook)
-    
-    yield  # Server is running
-    
+
+    # Fire-and-forget: sync runs AFTER the server is live
+    t = threading.Thread(target=_background_webhook_sync, daemon=True)
+    t.start()
+
+    yield  # Server is running and accepting connections
+
     # ── SHUTDOWN ──
     logger.info("👋 Aatomate API shutting down...")
 
