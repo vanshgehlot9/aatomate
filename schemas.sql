@@ -221,3 +221,42 @@ CREATE TABLE IF NOT EXISTS public.payments (
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Enable all for authenticated users" ON public.payments FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Enable insert for anon users" ON public.payments FOR INSERT WITH CHECK (true);
+
+-- RPC for handling incoming WhatsApp messages
+CREATE OR REPLACE FUNCTION public.handle_incoming_whatsapp(p_phone text, p_message text)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_chat_id uuid;
+    v_lead_id uuid;
+BEGIN
+    -- 1. Try to find the chat for this phone number
+    SELECT id INTO v_chat_id
+    FROM public.whatsapp_chats
+    WHERE phone_number = p_phone;
+
+    -- 2. If chat doesn't exist, create it (along with a placeholder lead)
+    IF v_chat_id IS NULL THEN
+        INSERT INTO public.leads (name, email, phone, status)
+        VALUES ('WhatsApp Lead ' || p_phone, p_phone || '@whatsapp.local', p_phone, 'new')
+        RETURNING id INTO v_lead_id;
+
+        INSERT INTO public.whatsapp_chats (lead_id, phone_number)
+        VALUES (v_lead_id, p_phone)
+        RETURNING id INTO v_chat_id;
+    END IF;
+
+    -- 3. Insert the incoming message
+    INSERT INTO public.whatsapp_messages (chat_id, sender_type, content)
+    VALUES (v_chat_id, 'user', p_message);
+
+    -- 4. Update the chat's updated_at
+    UPDATE public.whatsapp_chats
+    SET updated_at = NOW()
+    WHERE id = v_chat_id;
+
+    RETURN v_chat_id;
+END;
+$$;

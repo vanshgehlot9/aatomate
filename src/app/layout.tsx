@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Bebas_Neue, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import Preloader from "@/components/Preloader";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -48,6 +49,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans selection:bg-action-green selection:text-midnight-ink relative bg-canvas-ice text-midnight-ink">
+        <Preloader />
         {/* Global Noise Texture */}
         <div 
           className="pointer-events-none fixed inset-0 z-[999] h-full w-full opacity-[0.02]"

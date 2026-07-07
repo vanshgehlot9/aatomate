@@ -160,7 +160,7 @@ function PremiumBotVisual() {
 
 export default function Hero() {
   return (
-    <section id="hero" className="relative pt-[120px] pb-16 md:pt-32 md:pb-20 lg:pt-48 lg:pb-32 overflow-hidden px-4 sm:px-[32px] lg:px-[40px] max-w-7xl mx-auto">
+    <section id="hero" className="relative pt-[96px] pb-16 md:pt-[110px] md:pb-20 lg:pt-[130px] lg:pb-32 overflow-hidden px-4 sm:px-[32px] lg:px-[40px] max-w-7xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-12 lg:gap-[64px] items-center">
         
         {/* Text Content */}

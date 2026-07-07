@@ -12,10 +12,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
-  const isHomePage = pathname === "/";
-  // The text should be dark if we are on the light homepage and haven't scrolled down yet.
-  const isDarkText = isHomePage && !scrolled;
-
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -26,132 +22,134 @@ export default function Navbar() {
   }, []);
 
   const links = [
-    { name: "Services", href: "/#services" },
-    { name: "Process", href: "/#process" },
-    { name: "Industries", href: "/#industries" },
-    { name: "Products", href: "/#products" },
-    { name: "Pricing", href: "/#pricing" },
-    { name: "Results", href: "/#results" },
+    { name: "services", href: "/#services" },
+    { name: "process", href: "/#process" },
+    { name: "industries", href: "/#industries" },
+    { name: "products", href: "/#products" },
+    { name: "pricing", href: "/#pricing" },
+    { name: "results", href: "/#results" },
   ];
 
   return (
-    <nav 
-      className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 ease-out border-b ${
-        scrolled 
-          ? "py-4 bg-[#050505]/90 backdrop-blur-[20px] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)]" 
-          : "py-6 bg-transparent border-transparent"
-      }`}
-    >
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-8">
-        <div className="flex justify-between items-center h-[40px]">
-          
-          {/* Logo (Left) */}
-          <Link href="/" className="flex-shrink-0 flex items-center gap-3 group">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-lg overflow-hidden group-hover:opacity-90 transition-opacity bg-white shadow-sm">
-              <Image 
-                src="/aatomate.jpeg" 
-                alt="Aatomate Logo" 
-                fill 
-                className="object-cover"
-                sizes="40px"
-              />
-            </div>
-            <span className={`font-display text-[22px] tracking-tight font-bold leading-none mt-1 uppercase transition-colors duration-300 ${isDarkText ? "text-black" : "text-white"}`}>
-              aatomate
-            </span>
-          </Link>
-          
-          {/* Center Links (Desktop) */}
-          <div className="hidden md:flex items-center gap-8 lg:gap-10">
-            {links.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={`text-[14px] font-medium relative group transition-colors duration-300 ${
-                  isDarkText 
-                    ? "text-black/60 hover:text-black" 
-                    : "text-white/70 hover:text-white"
-                }`}
-              >
-                {link.name}
-                <span className={`absolute -bottom-1.5 left-0 w-full h-[2px] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 ease-out ${isDarkText ? "bg-[#25D366]" : "bg-[#fbff00]"}`} />
-              </Link>
-            ))}
+    <div className="fixed top-0 left-0 w-full z-[100] flex justify-center pointer-events-none mt-4 sm:mt-6 px-4">
+      
+      {/* Desktop Floating Pill */}
+      <nav 
+        className={`pointer-events-auto hidden md:flex items-center p-2 rounded-full transition-all duration-500 ease-out border ${
+          scrolled 
+            ? "bg-white/95 backdrop-blur-xl border-neutral-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] scale-95 origin-top" 
+            : "bg-white/80 backdrop-blur-md border-neutral-200/40 shadow-[0_4px_20px_rgba(0,0,0,0.03)] scale-100 origin-top"
+        }`}
+      >
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5 pl-3 pr-4 group cursor-pointer">
+          <div className="relative flex items-center justify-center w-[32px] h-[32px] rounded-full overflow-hidden bg-white shadow-sm border border-neutral-100 transition-transform duration-300 group-hover:scale-105">
+            <Image 
+              src="/aatomate.jpeg" 
+              alt="Aatomate Logo" 
+              fill 
+              className="object-cover"
+              sizes="32px"
+            />
           </div>
-
-          {/* CTA Button (Right) */}
-          <div className="hidden md:flex items-center">
+          <span className="font-sans text-[20px] tracking-[-0.04em] font-extrabold leading-none lowercase text-neutral-900 transition-colors duration-200 group-hover:text-black">
+            aatomate
+          </span>
+        </Link>
+        
+        {/* Links */}
+        <div className="flex items-center gap-1 px-4 border-l border-neutral-200/60">
+          {links.map((link) => (
             <Link
-              href="/contact"
-              className={`px-6 py-2.5 rounded-full text-[14px] font-bold tracking-wide hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center ${
-                isDarkText 
-                  ? "bg-black text-white shadow-[0_4px_14px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)]" 
-                  : "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-              }`}
+              key={link.name}
+              href={link.href}
+              className="px-4 py-2 rounded-full text-[15px] font-medium tracking-[-0.01em] text-neutral-600 hover:text-black hover:bg-neutral-100/50 transition-all duration-200"
             >
-              Schedule Demo
+              {link.name}
             </Link>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className={`transition-colors focus:outline-none p-2 ${isDarkText ? "text-black hover:text-[#25D366]" : "text-white hover:text-[#fbff00]"}`}
-              aria-label="Toggle Menu"
-            >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
+          ))}
         </div>
-      </div>
+
+        {/* CTA */}
+        <div className="pl-4">
+          <Link
+            href="/contact"
+            className="h-[40px] px-[20px] rounded-full text-[14px] font-semibold tracking-tight text-white bg-black hover:bg-neutral-800 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
+          >
+            Schedule demo <span className="opacity-70 font-normal">→</span>
+          </Link>
+        </div>
+      </nav>
+
+      {/* Mobile Floating Nav */}
+      <nav 
+        className={`pointer-events-auto md:hidden w-full max-w-[600px] mx-auto flex items-center justify-between p-2 rounded-2xl transition-all duration-300 ease-out border ${
+          scrolled || isOpen
+            ? "bg-white/95 backdrop-blur-xl border-neutral-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.08)]" 
+            : "bg-white/80 backdrop-blur-md border-neutral-200/40 shadow-sm"
+        }`}
+      >
+        {/* Logo Mobile */}
+        <Link href="/" className="flex items-center gap-2.5 pl-2 group">
+          <div className="relative flex items-center justify-center w-[32px] h-[32px] rounded-full overflow-hidden bg-white shadow-sm border border-neutral-100">
+            <Image 
+              src="/aatomate.jpeg" 
+              alt="Aatomate Logo" 
+              fill 
+              className="object-cover"
+              sizes="32px"
+            />
+          </div>
+          <span className="font-sans text-[20px] tracking-[-0.04em] font-extrabold leading-none lowercase text-neutral-900">
+            aatomate
+          </span>
+        </Link>
+
+        {/* Hamburger */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-2 mr-1 rounded-xl text-neutral-900 bg-neutral-100/50 hover:bg-neutral-200/50 transition-colors"
+          aria-label="Toggle Menu"
+        >
+          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </nav>
 
       {/* Mobile Drawer */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "100vh" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="md:hidden absolute top-[100%] left-0 w-full bg-[#050505] overflow-hidden border-t border-white/10"
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="pointer-events-auto md:hidden absolute top-[72px] left-4 right-4 bg-white/95 backdrop-blur-xl border border-neutral-200/60 rounded-[24px] shadow-2xl overflow-hidden z-[99]"
           >
-            <div className="flex flex-col px-6 py-8 space-y-6">
-              {links.map((link, i) => (
-                <motion.div
+            <div className="flex flex-col p-4 space-y-1">
+              {links.map((link) => (
+                <Link
                   key={link.name}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 + 0.1 }}
+                  href={link.href}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center px-4 h-[48px] rounded-xl text-[16px] font-medium tracking-[-0.01em] text-neutral-700 hover:text-black hover:bg-neutral-100/50 transition-colors"
                 >
-                  <Link
-                    href={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className="block text-[28px] font-display uppercase tracking-tight text-white/80 hover:text-white hover:translate-x-2 transition-all"
-                  >
-                    {link.name}
-                  </Link>
-                </motion.div>
+                  {link.name}
+                </Link>
               ))}
-              
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="pt-8 mt-4 border-t border-white/10"
-              >
+              <div className="pt-3 mt-2 border-t border-neutral-100/80">
                 <Link
                   href="/contact"
                   onClick={() => setIsOpen(false)}
-                  className="w-full flex items-center justify-center bg-[#fbff00] text-black h-[56px] rounded-2xl text-[16px] font-bold uppercase tracking-wide active:scale-95 transition-transform"
+                  className="w-full flex items-center justify-center bg-black text-white h-[52px] rounded-xl text-[15px] font-semibold tracking-tight transition-colors hover:bg-neutral-800"
                 >
-                  Schedule Demo
+                  Schedule demo →
                 </Link>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+
+    </div>
   );
 }
