@@ -31,6 +31,8 @@ STATE_CONTACT_SALES_PHONE = "CONTACT_SALES_PHONE"
 STATE_CONTACT_SALES_EMAIL = "CONTACT_SALES_EMAIL"
 STATE_CONTACT_SALES_MSG = "CONTACT_SALES_MSG"
 
+STATE_DEMO_SELECTION = "DEMO_SELECTION"
+
 class BotStateMachine:
     @staticmethod
     async def process_user_input(phone_number: str, chat_id: str, lead_id: str, user_input: str, is_interactive: bool = False, interactive_id: str = None):
@@ -93,15 +95,26 @@ class BotStateMachine:
                 next_state = STATE_EXPERT_DEPT
                 lead_data["service_interested"] = "Talk to an Expert"
                 response_payload = MessageBuilders.ask_expert_dept()
-            elif interactive_id == "menu_contact":
+            elif interactive_id == "menu_demo":
                 lead_id = LeadService.ensure_lead_record(phone_number, chat_id, lead_id, lead_data)
-                next_state = STATE_CONTACT_SALES_NAME
-                lead_data["service_interested"] = "Contact Sales"
-                response_payload = WhatsAppService.create_text_message("Great! Please reply with your full name.")
+                next_state = STATE_DEMO_SELECTION
+                lead_data["service_interested"] = "See Our Product"
+                response_payload = MessageBuilders.ask_demo_selection()
             else:
                 # Any text message (like "hi", "hello", etc.) → show main menu
                 response_payload = MessageBuilders.send_main_menu()
                 next_state = STATE_MAIN_MENU
+                
+        elif current_state == STATE_DEMO_SELECTION:
+            if is_interactive and interactive_id == "demo_hospital":
+                # Redirect to Hospital Bot
+                text = "Great choice! 🏥\n\nClick this link to chat with our live Hospital Bot and see it in action:\nhttps://wa.me/919000272057"
+                response_payload = WhatsAppService.create_text_message(text)
+                # Reset to main menu after redirecting
+                next_state = STATE_MAIN_MENU
+            else:
+                response_payload = MessageBuilders.ask_demo_selection()
+                next_state = STATE_DEMO_SELECTION
                 
         elif current_state == STATE_CHATBOT_INDUSTRY:
             if is_interactive:

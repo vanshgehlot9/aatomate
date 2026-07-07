@@ -144,11 +144,23 @@ class MessageBuilders:
                     {"id": "menu_pricing", "title": "💰 Get Pricing", "description": "Instant estimates"},
                     {"id": "menu_voice", "title": "📞 AI Voice Calling", "description": "AI Receptionists & outbound"},
                     {"id": "menu_expert", "title": "👨‍💼 Talk to an Expert", "description": "Book a consultation"},
-                    {"id": "menu_contact", "title": "💬 Contact Sales", "description": "Message our team directly"}
+                    {"id": "menu_demo", "title": "🚀 See Our Product", "description": "Try a live demo"}
                 ]
             }
         ]
         return WhatsAppService.create_interactive_list(text, "Select Option", sections)
+
+    @staticmethod
+    def ask_demo_selection():
+        sections = [
+            {
+                "title": "Available Demos",
+                "rows": [
+                    {"id": "demo_hospital", "title": "🏥 Hospital Bot", "description": "AI receptionist for clinics"}
+                ]
+            }
+        ]
+        return WhatsAppService.create_interactive_list("Which AI assistant would you like to see in action?", "Select Demo", sections)
 
     @staticmethod
     def ask_industry():
