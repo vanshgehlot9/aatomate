@@ -54,44 +54,60 @@ async def receive_whatsapp_message(request: Request, background_tasks: Backgroun
     """
     try:
         body = await request.json()
+        logger.info(f"[webhook] POST received | object={body.get('object')} entries={len(body.get('entry', []))}")
         
         if body.get("object") != "whatsapp_business_account":
+            logger.warning(f"[webhook] Rejected: not a whatsapp_business_account payload, got: {body.get('object')}")
             return JSONResponse(status_code=400, content={"status": "error", "message": "Not a WhatsApp payload"})
 
         for entry in body.get("entry", []):
+            entry_id = entry.get("id", "unknown")
             for change in entry.get("changes", []):
                 value = change.get("value", {})
+                field = change.get("field", "unknown")
+                logger.info(f"[webhook] Processing change: field={field} entry_id={entry_id}")
                 
                 # Handle status updates (delivery receipts etc.) — just log & skip
                 if "statuses" in value:
+                    for status in value["statuses"]:
+                        logger.info(f"[webhook] Status update: {status.get('status')} for {status.get('recipient_id', '?')}")
+                        if status.get("status") == "failed":
+                            err = status.get("errors", [{}])[0]
+                            logger.error(f"[webhook] DELIVERY FAILED to {status.get('recipient_id')} | Error: {err.get('message')} (code: {err.get('code')}) | Details: {err.get('error_data', {}).get('details')}")
                     if "messages" not in value:
-                        return Response(content="EVENT_RECEIVED", status_code=200)
+                        continue  # Use continue, not return — process other entries
                 
                 if "messages" not in value:
-                    return Response(content="EVENT_RECEIVED", status_code=200)
+                    logger.info(f"[webhook] No messages in this change (field={field}), skipping")
+                    continue  # Use continue, not return — process other entries
                 
                 metadata = value.get("metadata", {})
                 phone_number_id = metadata.get("phone_number_id")
+                display_phone = metadata.get("display_phone_number", "?")
+                logger.info(f"[webhook] Message metadata: phone_number_id={phone_number_id} display={display_phone}")
                 
-                # Check if this message is meant for a DIFFERENT phone number (like Doctorbot)
+                # Warn if phone_number_id doesn't match, but still process
+                # (the WABA-level webhook override ensures only our messages arrive here)
                 if phone_number_id and phone_number_id != settings.WHATSAPP_PHONE_NUMBER_ID:
-                    logger.info(f"Ignoring message meant for a different phone number ID: {phone_number_id}")
-                    continue
+                    logger.warning(f"[webhook] phone_number_id mismatch: got={phone_number_id} expected={settings.WHATSAPP_PHONE_NUMBER_ID} — processing anyway (WABA override active)")
                 
                 for msg in value["messages"]:
                     phone_number = msg.get("from")
                     message_id = msg.get("id", "")
+                    msg_type = msg.get("type", "unknown")
+                    logger.info(f"[webhook] Message: from={phone_number} id={message_id} type={msg_type}")
                     
                     # Dedup — skip already-processed messages
                     if message_id and _is_duplicate(message_id):
-                        logger.info(f"Skipping duplicate message {message_id}")
+                        logger.info(f"[webhook] Skipping duplicate message {message_id}")
                         continue
                     
-                    if msg.get("type") == "text":
+                    if msg_type == "text":
                         text_body = msg.get("text", {}).get("body", "")
+                        logger.info(f"[webhook] Text message from {phone_number}: '{text_body[:100]}'")
                         background_tasks.add_task(handle_incoming_message, phone_number, text_body, False, None)
                         
-                    elif msg.get("type") == "interactive" and "interactive" in msg:
+                    elif msg_type == "interactive" and "interactive" in msg:
                         interactive_id = None
                         interactive_title = ""
                         interactive = msg["interactive"]
@@ -102,12 +118,17 @@ async def receive_whatsapp_message(request: Request, background_tasks: Backgroun
                         elif interactive.get("type") == "list_reply" and "list_reply" in interactive:
                             interactive_id = interactive["list_reply"].get("id")
                             interactive_title = interactive["list_reply"].get("title")
-                            
+                        
+                        logger.info(f"[webhook] Interactive message from {phone_number}: id={interactive_id} title='{interactive_title}'")
                         background_tasks.add_task(handle_incoming_message, phone_number, interactive_title, True, interactive_id)
+                    else:
+                        # Handle unsupported types (e.g. reaction, sticker, location, contacts, etc.)
+                        logger.info(f"[webhook] Unsupported message type '{msg_type}' from {phone_number} — treating as text greeting")
+                        background_tasks.add_task(handle_incoming_message, phone_number, "hi", False, None)
 
         return Response(content="EVENT_RECEIVED", status_code=200)
     except Exception as e:
-        logger.error(f"Webhook processing error: {e}", exc_info=True)
+        logger.error(f"[webhook] Processing error: {e}", exc_info=True)
         return Response(content="EVENT_RECEIVED", status_code=200)
 
 

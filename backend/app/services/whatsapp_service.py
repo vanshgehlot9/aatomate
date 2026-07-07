@@ -29,10 +29,11 @@ class WhatsAppService:
         
         try:
             response = requests.post(url, headers=headers, json=payload, timeout=10)
+            logger.info(f"[send] TO={phone_number} STATUS={response.status_code} RESPONSE={response.text[:300]}")
             response.raise_for_status()
-            logger.info(f"Message sent successfully to {phone_number}")
+            logger.info(f"[send] Message sent successfully to {phone_number}")
         except Exception as e:
-            logger.error(f"Failed to send message: {e}")
+            logger.error(f"[send] Failed to send message to {phone_number}: {e}")
 
     @staticmethod
     def send_flow_cta_message(phone_number: str):
