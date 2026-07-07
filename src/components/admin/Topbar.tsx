@@ -1,14 +1,27 @@
 "use client";
 
+import Link from "next/link";
 import { Bell, Search } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 
 export default function Topbar() {
   return (
     <header className="h-16 border-b border-gray-200 dark:border-[#1F1F1F] bg-white/80 dark:bg-[#0A0A0A]/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 z-20 transition-colors duration-300 sticky top-0">
-      
-      {/* Left side empty or could have breadcrumbs later */}
-      <div className="flex-1 hidden md:block"></div>
+      <div className="flex-1 hidden md:flex items-center">
+        <Link href="/admin" className="flex items-center gap-4 group">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-950 to-black dark:from-white dark:to-gray-200 text-white dark:text-black flex items-center justify-center shadow-md border border-transparent dark:border-white/10 group-hover:scale-105 transition-all duration-300">
+            <span className="font-display font-bold text-2xl leading-none">A</span>
+          </div>
+          <div className="leading-none">
+            <div className="text-[18px] lg:text-[20px] font-display font-bold tracking-tight text-gray-900 dark:text-white">
+              AATOMATE
+            </div>
+            <div className="text-[11px] uppercase tracking-[0.28em] text-gray-500 dark:text-gray-400 mt-1">
+              Command Center
+            </div>
+          </div>
+        </Link>
+      </div>
 
       <div className="flex-1 flex justify-center md:justify-end md:mr-6">
         <div className="relative w-full max-w-[320px] lg:max-w-[400px]">

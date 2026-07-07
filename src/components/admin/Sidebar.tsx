@@ -41,24 +41,7 @@ export default function Sidebar() {
 
   return (
     <aside className="w-[260px] bg-white dark:bg-[#050505] border-r border-gray-200 dark:border-[#1F1F1F] flex flex-col h-full fixed md:relative z-30 transition-colors duration-300">
-      {/* Brand Header */}
-      <div className="px-6 py-6 border-b border-gray-200 dark:border-[#1F1F1F]">
-        <Link href="/admin" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 bg-gradient-to-br from-gray-900 to-black dark:from-white dark:to-gray-200 text-white dark:text-black flex items-center justify-center rounded-xl shadow-md group-hover:scale-105 transition-all duration-300 border border-transparent dark:border-white/10">
-            <span className="font-display font-bold text-xl leading-none">A</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="font-display font-bold text-[17px] tracking-tight text-gray-900 dark:text-white leading-tight">
-              AATOMATE
-            </span>
-            <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-0.5">
-              Command Center
-            </span>
-          </div>
-        </Link>
-      </div>
-
-      <nav className="flex-1 overflow-y-auto py-5 px-3 space-y-1">
+      <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
           // Special case for dashboard root

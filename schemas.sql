@@ -230,21 +230,16 @@ SECURITY DEFINER
 AS $$
 DECLARE
     v_chat_id uuid;
-    v_lead_id uuid;
 BEGIN
     -- 1. Try to find the chat for this phone number
     SELECT id INTO v_chat_id
     FROM public.whatsapp_chats
     WHERE phone_number = p_phone;
 
-    -- 2. If chat doesn't exist, create it (along with a placeholder lead)
+    -- 2. If chat doesn't exist, create it without a placeholder lead.
     IF v_chat_id IS NULL THEN
-        INSERT INTO public.leads (name, email, phone, status)
-        VALUES ('WhatsApp Lead ' || p_phone, p_phone || '@whatsapp.local', p_phone, 'new')
-        RETURNING id INTO v_lead_id;
-
-        INSERT INTO public.whatsapp_chats (lead_id, phone_number)
-        VALUES (v_lead_id, p_phone)
+        INSERT INTO public.whatsapp_chats (phone_number)
+        VALUES (p_phone)
         RETURNING id INTO v_chat_id;
     END IF;
 
@@ -260,3 +255,19 @@ BEGIN
     RETURN v_chat_id;
 END;
 $$;
+
+-- New columns for WhatsApp Bot Redesign
+ALTER TABLE public.whatsapp_chats ADD COLUMN IF NOT EXISTS bot_state JSONB DEFAULT '{}'::jsonb;
+
+ALTER TABLE public.leads 
+ADD COLUMN IF NOT EXISTS industry TEXT,
+ADD COLUMN IF NOT EXISTS business_size TEXT,
+ADD COLUMN IF NOT EXISTS budget TEXT,
+ADD COLUMN IF NOT EXISTS timeline TEXT,
+ADD COLUMN IF NOT EXISTS requirements TEXT,
+ADD COLUMN IF NOT EXISTS priority TEXT,
+ADD COLUMN IF NOT EXISTS lead_score TEXT,
+ADD COLUMN IF NOT EXISTS assigned_sales_executive TEXT,
+ADD COLUMN IF NOT EXISTS source TEXT,
+ADD COLUMN IF NOT EXISTS ai_summary TEXT;
+
