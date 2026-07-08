@@ -2,6 +2,7 @@ from app.services.whatsapp_service import WhatsAppService, MessageBuilders
 from app.services.lead_service import LeadService
 from app.db.supabase import db
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -157,11 +158,15 @@ class BotStateMachine:
                 response_payload = MessageBuilders.ask_chatbot_budget()
                 
         elif current_state == STATE_CHATBOT_CONTACT:
-            lead_data["email"] = user_input
-            response_payload = WhatsAppService.create_text_message("Thank you! Your requirements have been recorded. Our AI is generating your proposal and an expert will reach out shortly to schedule a demo.")
-            next_state = STATE_MAIN_MENU
-            lead_id = LeadService.ensure_lead_record(phone_number, chat_id, lead_id, lead_data)
-            await LeadService.run_lead_qualification(chat_id, lead_id, lead_data)
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", user_input.strip()):
+                response_payload = WhatsAppService.create_text_message("Please enter a valid email address so we can send you the proposal.")
+                next_state = STATE_CHATBOT_CONTACT
+            else:
+                lead_data["email"] = user_input.strip()
+                response_payload = WhatsAppService.create_text_message("Thank you! Your requirements have been recorded. Our AI is generating your proposal and an expert will reach out shortly to schedule a demo.")
+                next_state = STATE_MAIN_MENU
+                lead_id = LeadService.ensure_lead_record(phone_number, chat_id, lead_id, lead_data)
+                await LeadService.run_lead_qualification(chat_id, lead_id, lead_data)
             
         elif current_state == STATE_CONTACT_SALES_NAME:
             lead_data["name"] = user_input
@@ -174,9 +179,13 @@ class BotStateMachine:
             response_payload = WhatsAppService.create_text_message("What is your email address?")
             
         elif current_state == STATE_CONTACT_SALES_EMAIL:
-            lead_data["email"] = user_input
-            next_state = STATE_CONTACT_SALES_MSG
-            response_payload = WhatsAppService.create_text_message("Please write a short message about how we can help you.")
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", user_input.strip()):
+                response_payload = WhatsAppService.create_text_message("Please enter a valid email address.")
+                next_state = STATE_CONTACT_SALES_EMAIL
+            else:
+                lead_data["email"] = user_input.strip()
+                next_state = STATE_CONTACT_SALES_MSG
+                response_payload = WhatsAppService.create_text_message("Please write a short message about how we can help you.")
             
         elif current_state == STATE_CONTACT_SALES_MSG:
             lead_data["requirements"] = user_input
