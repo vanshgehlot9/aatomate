@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -10,11 +10,24 @@ import { Menu, X } from "lucide-react";
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const pathname = usePathname();
+  const isDarkPage = pathname !== '/';
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      const currentScrollY = window.scrollY;
+      
+      // Hide if scrolling down past 80px, show if scrolling up
+      if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY.current) {
+        setIsVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
+      setScrolled(currentScrollY > 20);
     };
     
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -31,21 +44,28 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="fixed top-0 left-0 w-full z-[100] pointer-events-none pt-4 sm:pt-6 px-4 sm:px-6 lg:px-8">
+    <div className={`fixed top-0 left-0 w-full z-[100] pt-4 sm:pt-6 px-4 sm:px-6 lg:px-8 transition-all duration-500 ${
+      isVisible ? 'opacity-100 translate-y-0 pointer-events-none' : 'opacity-0 -translate-y-8 pointer-events-none'
+    }`}>
       <div className="max-w-[1400px] mx-auto w-full relative flex items-center justify-between min-h-[64px]">
         
         {/* Logo - Separated and Bigger */}
-        <Link href="/" className="pointer-events-auto flex items-center gap-4 group relative z-10 shrink-0">
-          <div className="relative flex items-center justify-center w-[48px] h-[48px] md:w-[64px] md:h-[64px] rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm border border-neutral-200/60 transition-all duration-300 group-hover:scale-105 group-hover:shadow-md">
+        <Link 
+          href="/" 
+          className="pointer-events-auto flex items-center gap-4 group relative z-10 shrink-0"
+        >
+          <div className="relative flex items-center justify-center w-[56px] h-[56px] md:w-[80px] md:h-[80px] rounded-[14px] md:rounded-[20px] overflow-hidden bg-white shadow-sm border border-neutral-200/60 transition-all duration-300 group-hover:scale-105 group-hover:shadow-md">
             <Image 
               src="/aatomate.jpeg" 
               alt="Aatomate Logo" 
               fill 
               className="object-cover"
-              sizes="(max-width: 768px) 48px, 64px"
+              sizes="(max-width: 768px) 56px, 80px"
             />
           </div>
-          <span className="font-sans text-[28px] md:text-[36px] tracking-[-0.04em] font-extrabold leading-none lowercase text-neutral-900 transition-colors duration-200 group-hover:text-black">
+          <span className={`font-sans text-[32px] md:text-[44px] tracking-[-0.04em] font-extrabold leading-none lowercase transition-colors duration-200 mt-1 ${
+            isDarkPage ? 'text-white group-hover:text-neutral-200' : 'text-neutral-900 group-hover:text-black'
+          }`}>
             aatomate
           </span>
         </Link>
@@ -75,7 +95,9 @@ export default function Navbar() {
         <div className="pointer-events-auto hidden md:flex items-center relative z-10 shrink-0">
           <Link
             href="/contact"
-            className="h-[48px] px-[26px] rounded-full text-[15px] font-semibold tracking-tight text-white bg-neutral-900 hover:bg-black transition-all duration-300 shadow-[0_4px_14px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
+            className={`h-[48px] px-[26px] rounded-full text-[15px] font-semibold tracking-tight transition-all duration-300 shadow-[0_4px_14px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 flex items-center justify-center gap-2 group ${
+              isDarkPage ? 'bg-white text-black hover:bg-neutral-200' : 'bg-neutral-900 text-white hover:bg-black'
+            }`}
           >
             Book a Demo
             <span className="opacity-70 font-normal transition-transform duration-300 group-hover:translate-x-1">→</span>

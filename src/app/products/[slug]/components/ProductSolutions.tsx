@@ -117,7 +117,7 @@ export default function ProductSolutions({ product }: { product: any }) {
         <div className="mb-20 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-8">
           <h2 className="font-display text-[40px] md:text-[64px] leading-[1.1] text-midnight-ink uppercase tracking-tight max-w-2xl">
             Intelligent Solutions, <br/>
-            <span style={{ color: product.themeColor }}>Instant Results.</span>
+            <span>Instant Results.</span>
           </h2>
           <p className="text-[18px] text-midnight-ink/50 max-w-sm pb-2 font-medium">
             Turn your most tedious processes into autonomous operations that run flawlessly 24/7.

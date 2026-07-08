@@ -189,11 +189,6 @@ export default function Hero() {
               <span className="relative z-10 uppercase tracking-wide">Build Your AI Agent</span>
               <Bot className="w-[18px] h-[18px] md:w-[20px] md:h-[20px] relative z-10 group-hover:scale-110 transition-transform" />
             </Link>
-
-            <Link href="/contact" className="w-full sm:w-auto group rounded-[12px] bg-white/50 backdrop-blur-sm border-2 border-midnight-ink/10 px-[24px] py-[16px] md:px-[32px] md:py-[18px] text-[15px] md:text-[16px] font-bold text-midnight-ink transition-all hover:bg-white hover:border-midnight-ink/20 flex items-center justify-center gap-[8px]">
-              <span className="uppercase tracking-wide">Book a Demo</span>
-              <ArrowRight className="w-[16px] h-[16px] opacity-50 group-hover:translate-x-1 transition-transform" />
-            </Link>
           </div>
         </motion.div>
         

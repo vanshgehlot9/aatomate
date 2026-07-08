@@ -56,7 +56,8 @@ export default function ContactPage() {
                 <div>
                   <h4 className="font-mono text-[11px] uppercase text-white/40 tracking-widest font-bold mb-2">Direct Contact</h4>
                   <p className="text-[18px] font-medium">+91 90002 72248</p>
-                  <p className="text-[18px] font-medium text-[#fbff00]">hello@aatomate.com</p>
+                  <p className="text-[18px] font-medium">+91 90002 72057</p>
+                  <p className="text-[18px] font-medium text-[#fbff00]">info@aatomate.com</p>
                 </div>
                 <div>
                   <h4 className="font-mono text-[11px] uppercase text-white/40 tracking-widest font-bold mb-2">Location</h4>
@@ -65,12 +66,16 @@ export default function ContactPage() {
               </div>
               
               {/* Mobile Compact Contact Cards */}
-              <div className="flex flex-row gap-3 lg:hidden mb-2">
-                <a href="tel:+919000272248" className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
+              <div className="grid grid-cols-2 gap-3 lg:hidden mb-2">
+                <a href="tel:+919000272248" className="bg-white/5 border border-white/10 rounded-xl p-3 hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
                   <Phone className="w-4 h-4 text-[#fbff00]" />
-                  <span className="text-[13px] font-bold">Call Us</span>
+                  <span className="text-[12px] font-bold">Call 1</span>
                 </a>
-                <a href="mailto:hello@aatomate.com" className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
+                <a href="tel:+919000272057" className="bg-white/5 border border-white/10 rounded-xl p-3 hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
+                  <Phone className="w-4 h-4 text-[#fbff00]" />
+                  <span className="text-[12px] font-bold">Call 2</span>
+                </a>
+                <a href="mailto:info@aatomate.com" className="col-span-2 bg-white/5 border border-white/10 rounded-xl p-3 hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
                   <Mail className="w-4 h-4 text-[#fbff00]" />
                   <span className="text-[13px] font-bold">Email Us</span>
                 </a>

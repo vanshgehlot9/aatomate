@@ -55,8 +55,8 @@ export default function Footer() {
               <div className="w-[40px] h-[40px] rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/50 shrink-0">
                 <Mail className="w-[16px] h-[16px]" />
               </div>
-              <Link href="mailto:hello@aatomate.com" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">
-                hello@aatomate.com
+              <Link href="mailto:info@aatomate.com" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">
+                info@aatomate.com
               </Link>
             </div>
             
@@ -64,9 +64,14 @@ export default function Footer() {
               <div className="w-[40px] h-[40px] rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/50 shrink-0">
                 <Phone className="w-[16px] h-[16px]" />
               </div>
-              <Link href="tel:+919000272248" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">
-                +91 90002 72248
-              </Link>
+              <div className="flex flex-col gap-1">
+                <Link href="tel:+919000272248" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">
+                  +91 90002 72248
+                </Link>
+                <Link href="tel:+919000272057" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">
+                  +91 90002 72057
+                </Link>
+              </div>
             </div>
             
             <div className="flex items-center gap-[16px]">

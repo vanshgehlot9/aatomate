@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 const GoogleLogo = () => (
@@ -84,7 +84,7 @@ export default function Testimonials({ testimonials = [] }: { testimonials?: Tes
           
           <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0">
             <Link 
-              href="https://g.page/r/your-google-link/review" 
+              href="https://g.page/r/CeQcd3mmoRVfEBM/review" 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-4 rounded-full transition-colors font-medium text-white"
@@ -146,6 +146,20 @@ export default function Testimonials({ testimonials = [] }: { testimonials?: Tes
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Leave a Review CTA */}
+        <div className="mt-12 flex justify-center px-4">
+          <Link
+            href="https://g.page/r/CeQcd3mmoRVfEBM/review"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-300 px-6 sm:px-8 py-3.5 sm:py-4 rounded-full shadow-lg"
+          >
+            <GoogleLogo />
+            <span className="font-bold text-white text-[15px] sm:text-[16px]">Review us on Google</span>
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white/50 group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
 
       </div>

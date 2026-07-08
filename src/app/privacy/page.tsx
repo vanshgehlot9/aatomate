@@ -44,7 +44,7 @@ export default function PrivacyPolicy() {
 
           <h2>5. Contact Details</h2>
           <p>
-            If you have any questions about this privacy policy or our privacy practices, please contact us at: <a href="mailto:hello@aatomate.com">hello@aatomate.com</a>
+            If you have any questions about this privacy policy or our privacy practices, please contact us at: <a href="mailto:info@aatomate.com">info@aatomate.com</a>
           </p>
         </div>
       </div>

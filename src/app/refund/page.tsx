@@ -33,7 +33,7 @@ export default function RefundPolicy() {
 
           <h2>5. How to Request a Refund</h2>
           <p>
-            To request a refund or dispute a charge, please contact our billing department directly at: <a href="mailto:hello@aatomate.com">hello@aatomate.com</a> within 14 days of the charge. Please include your company name and detailed reasons for the request.
+            To request a refund or dispute a charge, please contact our billing department directly at: <a href="mailto:info@aatomate.com">info@aatomate.com</a> within 14 days of the charge. Please include your company name and detailed reasons for the request.
           </p>
         </div>
       </div>
