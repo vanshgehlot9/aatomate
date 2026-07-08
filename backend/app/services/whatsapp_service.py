@@ -226,16 +226,14 @@ class MessageBuilders:
     def ask_chatbot_budget():
         sections = [
             {
-                "title": "Budget Range",
+                "title": "Select Package",
                 "rows": [
-                    {"id": "bud_under_50k", "title": "Under ₹50,000"},
-                    {"id": "bud_50k_1l", "title": "₹50k - ₹1 Lakh"},
-                    {"id": "bud_1l_3l", "title": "₹1 Lakh - ₹3 Lakhs"},
-                    {"id": "bud_above_3l", "title": "Above ₹3 Lakhs"}
+                    {"id": "bud_starter", "title": "Starter Package", "description": "₹14,999 Onboarding + ₹3,999/mo"},
+                    {"id": "bud_enterprise", "title": "Enterprise Package", "description": "₹19,999 Onboarding + ₹8,999/mo"}
                 ]
             }
         ]
-        return WhatsAppService.create_interactive_list("What is your approximate budget for this project?", "Select Budget", sections)
+        return WhatsAppService.create_interactive_list("Which pricing package fits your needs?", "Select Package", sections)
 
     @staticmethod
     def ask_pricing_service():

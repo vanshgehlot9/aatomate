@@ -108,7 +108,7 @@ class BotStateMachine:
         elif current_state == STATE_DEMO_SELECTION:
             if is_interactive and interactive_id == "demo_hospital":
                 # Redirect to Hospital Bot
-                text = "Great choice! 🏥\n\nClick this link to chat with our live Hospital Bot and see it in action:\nhttps://wa.me/919000272057"
+                text = "Great choice! 🏥\n\nClick this link to chat with our live Hospital Bot and see it in action:\nhttps://wa.me/919000272057?text=hii"
                 response_payload = WhatsAppService.create_text_message(text)
                 # Reset to main menu after redirecting
                 next_state = STATE_MAIN_MENU
