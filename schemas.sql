@@ -97,6 +97,11 @@ CREATE TABLE IF NOT EXISTS public.services (
     title TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
     description TEXT,
+    problem TEXT,
+    solution TEXT,
+    benefits JSONB DEFAULT '[]'::jsonb,
+    process JSONB DEFAULT '[]'::jsonb,
+    faq JSONB DEFAULT '[]'::jsonb,
     icon_name TEXT,
     display_order INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -271,3 +276,10 @@ ADD COLUMN IF NOT EXISTS assigned_sales_executive TEXT,
 ADD COLUMN IF NOT EXISTS source TEXT,
 ADD COLUMN IF NOT EXISTS ai_summary TEXT;
 
+-- New columns for Services redesign
+ALTER TABLE public.services
+ADD COLUMN IF NOT EXISTS problem TEXT,
+ADD COLUMN IF NOT EXISTS solution TEXT,
+ADD COLUMN IF NOT EXISTS benefits JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS process JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS faq JSONB DEFAULT '[]'::jsonb;

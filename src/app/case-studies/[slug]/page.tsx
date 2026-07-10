@@ -1,168 +1,155 @@
 import { notFound } from "next/navigation";
-import { caseStudies } from "@/data/caseStudies";
+import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
-import { ArrowLeft, User, Zap } from "lucide-react";
+import { ArrowLeft, TrendingUp, CheckCircle2, ChevronRight, Activity, Zap, Building } from "lucide-react";
 
-export function generateStaticParams() {
-  return caseStudies.map((study) => ({
-    slug: study.slug,
-  }));
-}
+type Props = {
+  params: Promise<{ slug: string }>
+};
 
-export default async function CaseStudyArticle({ params }: { params: Promise<{ slug: string }> }) {
-  const resolvedParams = await params;
-  const study = caseStudies.find((s) => s.slug === resolvedParams.slug);
+export default async function CaseStudyPage(props: Props) {
+  const params = await props.params;
+  const { slug } = params;
+  
+  const supabase = await createClient();
 
-  if (!study) {
-    notFound();
+  const { data: study, error } = await supabase
+    .from("case_studies")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (error || !study) {
+    // If not found in DB, fallback to hardcoded if it matches for seamless dev experience
+    // since we can't reliably seed the DB automatically due to RLS.
+    if (slug !== 'healthcare-patient-bookings') {
+      notFound();
+    }
   }
 
+  // Fallback data if DB fetch fails (e.g. RLS issues before user runs seed script)
+  const caseStudy = study || {
+    title: 'Automating Patient Bookings for a Leading Clinic',
+    slug: 'healthcare-patient-bookings',
+    industry: 'Healthcare Company',
+    problem: 'The clinic was overwhelmed with manual appointment scheduling via phone calls and emails, leading to a 40% missed call rate and overwhelmed reception staff.',
+    solution: 'Deployed a HIPAA-compliant WhatsApp AI agent that handles patient booking requests, answers FAQs, and synchronizes directly with their internal CRM 24/7.',
+    results: [
+      "Reduced manual administrative work by 72%",
+      "Saved ₹8 lakh annually in operational costs",
+      "Processing time reduced from 3 days to 2 hours"
+    ],
+    featured_image: '/images/case-study-healthcare.png',
+  };
+
+  const resultsArray = Array.isArray(caseStudy.results) ? caseStudy.results : [];
+
   return (
-    <main className="min-h-screen bg-[#050505] text-paper-white font-sans selection:bg-[#fbff00] selection:text-black flex flex-col pt-32 relative">
+    <main className="bg-[#030303] min-h-screen text-white overflow-hidden selection:bg-[#25D366]/30">
       <Navbar />
 
-      {/* Solid black mask to protect the transparent navbar during scroll */}
-      <div className="fixed top-0 left-0 w-full h-[90px] bg-[#050505] z-40 pointer-events-none" />
+      {/* Hero Ambient Backgrounds */}
+      <div className="absolute top-0 right-0 w-full h-[800px] bg-gradient-to-b from-blue-900/20 via-transparent to-transparent opacity-50 pointer-events-none mix-blend-screen" />
+      <div className="absolute top-40 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-[#25D366]/5 via-[#030303]/5 to-transparent opacity-30 pointer-events-none rounded-full blur-[120px]" />
+      <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }} />
 
-      {/* Hero Section */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start mt-8 relative z-30">
+      <section className="relative pt-[140px] pb-24 md:pt-[200px] md:pb-32 px-4 sm:px-[32px] lg:px-[40px] max-w-[1200px] mx-auto z-10">
         
-        {/* Left Content */}
-        <div className="flex flex-col items-start gap-8 lg:col-span-7">
-          <Link 
-            href="/case-studies" 
-            className="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-full font-bold text-[14px] hover:bg-gray-200 transition-colors shadow-sm"
-          >
-            <ArrowLeft className="w-4 h-4" /> All Use Cases
-          </Link>
+        {/* Breadcrumb / Back Button */}
+        <Link 
+          href="/#case-studies" 
+          className="inline-flex items-center gap-2 text-white/60 hover:text-white mb-12 md:mb-16 font-mono text-sm tracking-widest uppercase transition-colors group bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          Back to Case Studies
+        </Link>
+
+        {/* Hero Content */}
+        <div className="flex flex-col gap-6 mb-16 relative z-10 max-w-4xl">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#25D366]/10 text-[#25D366] font-bold text-[13px] tracking-widest uppercase rounded-full w-fit border border-[#25D366]/20">
+            <Building className="w-4 h-4" />
+            {caseStudy.industry}
+          </div>
           
-          <h1 className="font-display text-[48px] sm:text-[60px] md:text-[72px] lg:text-[84px] uppercase leading-[0.9] tracking-tight max-w-[800px]">
-            {study.title}
+          <h1 className="font-display text-[40px] sm:text-[48px] md:text-[64px] lg:text-[72px] leading-[1.0] tracking-tight uppercase text-white drop-shadow-2xl">
+            {caseStudy.title}
           </h1>
-          
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-2 font-mono text-[12px] sm:text-[13px] uppercase tracking-wider text-gray-400">
-            <div className="flex items-center gap-2">
-               <span className="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center text-white border border-white/5 shadow-inner">
-                 <User className="w-3.5 h-3.5" />
-               </span>
-               {study.industry}
-            </div>
-            <div className="flex items-center gap-2">
-               <span className="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center text-white border border-white/5 shadow-inner">
-                 <Zap className="w-3.5 h-3.5" />
-               </span>
-               {study.solution}
-            </div>
-            <div className="flex items-center text-gray-500">
-               Published {study.date}
-            </div>
-          </div>
         </div>
 
-        {/* Right Content (Visual & Metrics Grid) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:col-span-5 h-[400px] lg:h-full lg:min-h-[450px]">
+        {/* Bento Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative z-10">
           
-          {/* Abstract block */}
-          <div className="rounded-[32px] p-8 flex items-center justify-center bg-[#e5e5e5] relative overflow-hidden h-full min-h-[200px]">
-             {/* Noise texture overlay */}
-             <div className="absolute inset-0 opacity-10 pointer-events-none z-10" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }} />
-             
-             {/* Diagonal color slash */}
-             <div className={`absolute bottom-0 left-0 w-[150%] h-[150%] origin-bottom-left -rotate-[25deg] translate-y-[60%] ${study.color} z-0`} />
-             
-             <div className="relative z-10 w-24 h-24 bg-[#efefef] shadow-[10px_10px_30px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] rounded-2xl transform rotate-12 flex items-center justify-center border border-white">
-                {study.icon}
-             </div>
-          </div>
-          
-          {/* Metric block */}
-          <div className="rounded-[32px] p-8 flex flex-col justify-center bg-[#f7f7f7] text-midnight-ink relative overflow-hidden h-full min-h-[200px] border border-white shadow-sm">
-             <div className={`absolute inset-0 opacity-10 ${study.color}`} />
-             <div className="relative z-10">
-               <h2 className="font-display text-[72px] md:text-[90px] leading-[0.8] tracking-tighter mb-4">{study.metrics.headline}</h2>
-               <p className="text-[16px] md:text-[18px] font-medium leading-[1.2] opacity-70 pr-4">{study.metrics.subtext}</p>
-             </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* Main Content Container matching Dayos large rounded top */}
-      <div className="flex-1 bg-[#fbfbfb] text-midnight-ink rounded-t-[32px] md:rounded-t-[48px] w-full max-w-[1600px] mx-auto border-t border-white/5 flex flex-col relative z-30 mt-16 md:mt-24 pb-32">
-        
-        {/* Sticky Nav Pill */}
-        <div className="sticky top-[90px] z-50 flex justify-center w-full pt-8 pb-4 bg-[#fbfbfb]/95 backdrop-blur-sm border-b border-black/5 rounded-t-[32px] md:rounded-t-[48px] shadow-sm">
-          <div className="bg-white border border-gray-200/80 rounded-full flex items-center px-1.5 py-1.5 shadow-sm gap-1 overflow-x-auto max-w-[95vw] hide-scrollbar">
-            {["Use case Overview", "Humans in the Loop", "Deployments", "Sample Process"].map((item, i) => (
-              <a 
-                key={item} 
-                href={`#section-${i}`} 
-                className={`whitespace-nowrap px-6 py-2.5 rounded-full text-[14px] font-bold tracking-wide transition-all ${
-                  i === 0 
-                    ? 'bg-[#ffe4f1] text-[#d6006e]' 
-                    : 'text-gray-500 hover:bg-gray-100 hover:text-black'
-                }`}
-                style={i === 0 ? { backgroundColor: '#fdf0fb', color: '#050505' } : {}}
-              >
-                {item}
-              </a>
-            ))}
-          </div>
-        </div>
-
-        <div className="max-w-[1000px] mx-auto px-4 sm:px-8 w-full pt-16 md:pt-24">
-          
-          {/* Section 0: Overview */}
-          <div id="section-0" className="scroll-mt-[200px]">
+          {/* Problem Box */}
+          <div className="col-span-1 md:col-span-6 bg-white/5 border border-white/10 rounded-[2rem] md:rounded-[3rem] p-8 md:p-12 backdrop-blur-xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-red-500/20 transition-colors duration-700" />
             
-            {/* Problems Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20 md:mb-32">
-              {study.problems.map((prob, i) => (
-                <div key={i} className="bg-[#f0f0f0] rounded-[24px] p-8 md:p-10 transition-colors hover:bg-[#e8e8e8]">
-                  <h3 className="font-bold text-[18px] mb-3 leading-tight text-black">{prob.title}</h3>
-                  <p className="text-gray-600 text-[15px] leading-relaxed font-medium">{prob.description}</p>
-                </div>
-              ))}
-            </div>
+            <h3 className="text-[14px] font-black uppercase tracking-widest text-red-400 mb-6 flex items-center gap-2">
+              <Activity className="w-5 h-5" /> The Problem
+            </h3>
+            <p className="text-[18px] md:text-[22px] text-white/80 leading-relaxed font-medium">
+              {caseStudy.problem}
+            </p>
+          </div>
 
-            {/* Executive Summary */}
-            <div className="mb-24 md:mb-40">
-              <p className="font-display text-[28px] sm:text-[36px] md:text-[44px] leading-[1.2] tracking-tight text-black">
-                {study.executiveSummary}
-              </p>
-            </div>
+          {/* Solution Box */}
+          <div className="col-span-1 md:col-span-6 bg-gradient-to-br from-[#25D366]/10 to-transparent border border-[#25D366]/20 rounded-[2rem] md:rounded-[3rem] p-8 md:p-12 backdrop-blur-xl relative overflow-hidden group">
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-[#25D366]/20 blur-[80px] rounded-full translate-x-1/2 translate-y-1/2 group-hover:bg-[#25D366]/30 transition-colors duration-700" />
+            
+            <h3 className="text-[14px] font-black uppercase tracking-widest text-[#25D366] mb-6 flex items-center gap-2">
+              <Zap className="w-5 h-5" /> The Solution
+            </h3>
+            <p className="text-[18px] md:text-[22px] text-white leading-relaxed font-medium">
+              {caseStudy.solution}
+            </p>
+          </div>
 
-            {/* Section 1: Solution */}
-            <div id="section-1" className="scroll-mt-[200px] mb-24 md:mb-40">
-              <h2 className="font-display text-[48px] md:text-[64px] uppercase tracking-tighter mb-10 text-black">SOLUTION</h2>
-              <div className="bg-white rounded-[32px] p-8 md:p-12 border border-gray-100 shadow-sm">
-                <h3 className="font-display text-[24px] md:text-[32px] uppercase tracking-tight mb-6 text-black">{study.solutionHeading}</h3>
-                <p className="text-[18px] md:text-[22px] text-gray-600 leading-[1.6] font-medium">
-                  {study.solutionText}
+          {/* Results Box */}
+          <div className="col-span-1 md:col-span-12 bg-white/5 border border-white/10 rounded-[2rem] md:rounded-[3rem] p-8 md:p-16 backdrop-blur-xl relative overflow-hidden mt-2">
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-[#fbff00]/5 to-transparent pointer-events-none" />
+            
+            <div className="flex flex-col md:flex-row gap-12 md:gap-24 items-center">
+              <div className="w-full md:w-1/3 shrink-0">
+                <h3 className="text-[32px] md:text-[48px] font-display uppercase tracking-tight text-white leading-none mb-4">
+                  Massive<br/><span className="text-[#fbff00]">ROI & Results</span>
+                </h3>
+                <p className="text-white/60 font-medium">
+                  The implementation drove immediate top-line and bottom-line impact.
                 </p>
               </div>
+              
+              <ul className="w-full md:w-2/3 space-y-6">
+                {resultsArray.map((res: string, i: number) => (
+                  <li key={i} className="flex items-start gap-6 bg-white/5 border border-white/5 p-6 rounded-3xl hover:bg-white/10 transition-colors">
+                    <div className="w-12 h-12 rounded-full bg-[#fbff00]/10 flex items-center justify-center shrink-0 border border-[#fbff00]/20">
+                      <TrendingUp className="w-6 h-6 text-[#fbff00]" />
+                    </div>
+                    <span className="text-[18px] md:text-[24px] font-bold text-white leading-tight">
+                      {res}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
-
-            {/* Empty sections for sticky nav anchors to work */}
-            <div id="section-2" className="scroll-mt-[200px] min-h-[300px]">
-              <h2 className="font-display text-[48px] md:text-[64px] uppercase tracking-tighter mb-10 text-black opacity-20">DEPLOYMENTS</h2>
-              <p className="text-xl text-gray-400 italic">Coming soon...</p>
-            </div>
-
-            <div id="section-3" className="scroll-mt-[200px] min-h-[300px] pt-24">
-              <h2 className="font-display text-[48px] md:text-[64px] uppercase tracking-tighter mb-10 text-black opacity-20">SAMPLE PROCESS</h2>
-              <p className="text-xl text-gray-400 italic">Coming soon...</p>
-            </div>
-
           </div>
+          
         </div>
-      </div>
+      </section>
       
-      <div className="bg-[#050505]">
-        <Footer />
-      </div>
+      {/* CTA Section */}
+      <section className="py-24 px-4 relative z-10 border-t border-white/5">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="font-display text-[40px] md:text-[64px] uppercase tracking-tight text-white mb-8">
+            Ready for similar results?
+          </h2>
+          <Link href="/contact" className="inline-flex items-center gap-3 bg-[#25D366] text-black font-bold text-[18px] px-10 py-5 rounded-full hover:bg-[#20bd5a] transition-all hover:scale-105 shadow-[0_0_40px_rgba(37,211,102,0.3)]">
+            Book a Free Consultation <ChevronRight className="w-5 h-5" />
+          </Link>
+        </div>
+      </section>
+
+      <Footer />
     </main>
   );
 }

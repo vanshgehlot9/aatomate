@@ -257,6 +257,11 @@ export type Database = {
           title: string
           slug: string
           description: string | null
+          problem: string | null
+          solution: string | null
+          benefits: Json | null
+          process: Json | null
+          faq: Json | null
           icon_name: string | null
           display_order: number | null
           created_at: string
@@ -266,6 +271,11 @@ export type Database = {
           title: string
           slug: string
           description?: string | null
+          problem?: string | null
+          solution?: string | null
+          benefits?: Json | null
+          process?: Json | null
+          faq?: Json | null
           icon_name?: string | null
           display_order?: number | null
           created_at?: string
@@ -275,6 +285,11 @@ export type Database = {
           title?: string
           slug?: string
           description?: string | null
+          problem?: string | null
+          solution?: string | null
+          benefits?: Json | null
+          process?: Json | null
+          faq?: Json | null
           icon_name?: string | null
           display_order?: number | null
           created_at?: string

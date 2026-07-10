@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import { Star, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, ArrowRight, Play, Quote } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const GoogleLogo = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -16,39 +17,39 @@ const GoogleLogo = () => (
 const reviews = [
   {
     name: "Rohan Gupta",
-    role: "CEO, TechFlow",
+    role: "CEO",
+    company: "TechFlow",
     text: "Aatomate completely transformed our inbound lead process. We're qualifying leads 10x faster with their voice agents. The ROI was immediate.",
-    time: "2 weeks ago"
+    time: "2 weeks ago",
+    avatar: "https://i.pravatar.cc/150?u=rohan",
+    hasVideo: true
   },
   {
     name: "Priya Sharma",
     role: "Operations Director",
+    company: "MedicaCorp",
     text: "The WhatsApp automation is flawless. Our customers think they are talking to a real human. Customer satisfaction scores have gone up 40%.",
-    time: "1 month ago"
+    time: "1 month ago",
+    avatar: "https://i.pravatar.cc/150?u=priya",
+    hasVideo: false
   },
   {
     name: "Amit Desai",
-    role: "Founder, Desai Realty",
+    role: "Founder",
+    company: "Desai Realty",
     text: "We used to lose leads after hours. Now, the AI books property viewings 24/7. It's like having a top-performing agent that never sleeps.",
-    time: "3 months ago"
+    time: "3 months ago",
+    avatar: "https://i.pravatar.cc/150?u=amit",
+    hasVideo: true
   },
   {
     name: "Karan Patel",
     role: "E-commerce Head",
+    company: "ShopZen",
     text: "Integrating Aatomate with our Shopify store took less than a week. The automated order tracking and returns handling is a game changer.",
-    time: "2 weeks ago"
-  },
-  {
-    name: "Neha Singh",
-    role: "Clinic Manager",
-    text: "Handling patient appointments was a nightmare before Aatomate. Now, the AI handles 80% of bookings and rescheduling. Fantastic service.",
-    time: "1 month ago"
-  },
-  {
-    name: "Vikram Malhotra",
-    role: "Agency Owner",
-    text: "The best investment we've made this year. The team is incredibly responsive and the AI agents are shockingly good at handling complex queries.",
-    time: "2 months ago"
+    time: "2 weeks ago",
+    avatar: "https://i.pravatar.cc/150?u=karan",
+    hasVideo: false
   }
 ];
 
@@ -70,11 +71,13 @@ export default function Testimonials({ testimonials = [] }: { testimonials?: Tes
 
   return (
     <section id="testimonials" className="py-32 bg-[#141414] text-paper-white relative overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay pointer-events-none" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }} />
+      
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 mb-16">
           <div className="max-w-2xl">
-            <h2 className="font-display text-[48px] md:text-[64px] leading-[1] tracking-[-0.02em] uppercase mb-4">
+            <h2 className="font-display text-[48px] md:text-[64px] leading-[1] tracking-[-0.02em] uppercase mb-4 text-white">
               Client <span className="text-white/40">Reviews</span>
             </h2>
             <p className="text-[18px] text-white/60 font-medium">
@@ -118,34 +121,76 @@ export default function Testimonials({ testimonials = [] }: { testimonials?: Tes
           className="flex gap-6 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-8"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {displayTestimonials.map((review: any, idx) => (
-            <div 
-              key={review.id || idx}
-              className="snap-start shrink-0 w-[85vw] sm:w-[400px] md:w-[450px] bg-[#1a1a1a] border border-white/5 p-8 md:p-10 rounded-[32px] flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex justify-between items-start mb-8">
-                  <div className="flex gap-1">
-                    {[...Array(review.rating || 5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-[#FBBC05] text-[#FBBC05]" />
-                    ))}
-                  </div>
-                  <GoogleLogo />
-                </div>
-                <p className="text-[18px] leading-relaxed text-white/90 mb-8 font-medium">
-                  "{review.content || review.text}"
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between border-t border-white/10 pt-6">
+          {displayTestimonials.map((review: any, idx) => {
+            const avatarUrl = review.avatar_url || review.avatar;
+            const hasVideo = review.hasVideo || false;
+            
+            return (
+              <div 
+                key={review.id || idx}
+                className="snap-start shrink-0 w-[85vw] sm:w-[450px] md:w-[500px] bg-[#1a1a1a] border border-white/5 p-8 md:p-10 rounded-[32px] flex flex-col justify-between relative group"
+              >
+                <Quote className="absolute top-8 right-8 w-12 h-12 text-white/5" aria-hidden="true" />
+                
                 <div>
-                  <h4 className="font-bold text-white text-[16px]">{review.author_name || review.name}</h4>
-                  <p className="text-[14px] text-white/50 mt-1">{review.author_title || review.role} {review.company ? `at ${review.company}` : ''}</p>
+                  <div className="flex justify-between items-start mb-8">
+                    <div className="flex gap-1" aria-label={`${review.rating || 5} out of 5 stars`}>
+                      {[...Array(review.rating || 5)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 fill-[#FBBC05] text-[#FBBC05]" aria-hidden="true" />
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <p className="text-[18px] md:text-[20px] leading-relaxed text-white/90 mb-10 font-medium relative z-10">
+                    "{review.content || review.text}"
+                  </p>
                 </div>
-                <span className="text-[12px] text-white/40 font-mono">{review.time || 'Recently'}</span>
+
+                <div className="flex items-center gap-4 border-t border-white/10 pt-6">
+                  {/* Avatar / Video Thumbnail */}
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-white/10 group-hover:border-[#25D366]/50 transition-colors">
+                    {avatarUrl ? (
+                      <Image
+                        src={avatarUrl}
+                        alt={`Photo of ${review.author_name || review.name}${(review.author_title || review.role) ? `, ${review.author_title || review.role}` : ''}${review.company ? ` at ${review.company}` : ''}`}
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-white/10 flex items-center justify-center text-white font-bold text-xl" aria-label={`Avatar for ${review.author_name || review.name}`}>
+                        {(review.author_name || review.name).charAt(0)}
+                      </div>
+                    )}
+                    
+                    {/* Video Play Overlay */}
+                    {hasVideo && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[2px] cursor-pointer hover:bg-black/20 transition-colors" aria-label="Watch video testimonial">
+                        <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center pl-0.5">
+                          <Play className="w-4 h-4 text-black fill-black" aria-hidden="true" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Author Details */}
+                  <div className="flex-1">
+                    <h4 className="font-bold text-white text-[16px]">{review.author_name || review.name}</h4>
+                    <p className="text-[13px] text-white/50 mt-1 flex items-center gap-2">
+                      <span>{review.author_title || review.role}</span>
+                      {review.company && (
+                        <>
+                          <span className="w-1 h-1 rounded-full bg-white/20" />
+                          <span className="text-white/70 font-semibold">{review.company}</span>
+                        </>
+                      )}
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Leave a Review CTA */}
@@ -163,11 +208,6 @@ export default function Testimonials({ testimonials = [] }: { testimonials?: Tes
         </div>
 
       </div>
-      <style jsx global>{`
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </section>
   );
 }

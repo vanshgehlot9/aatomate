@@ -176,18 +176,21 @@ export default function Hero() {
           </div>
           
           <h1 className="font-display text-[44px] sm:text-[56px] md:text-[80px] lg:text-[100px] leading-[0.95] tracking-[-0.03em] text-midnight-ink uppercase mb-[20px] md:mb-[32px]">
-            Build AI Agents<br/>
-            <span className="text-[#25D366]">That Sell.</span>
+            AI Automation That<br/>
+            <span className="text-[#25D366]">Saves Time,</span><br/>
+            Reduces Costs & Grows Business.
           </h1>
           
           <p className="text-[16px] sm:text-[18px] lg:text-[20px] leading-[1.6] text-ash-gray font-medium max-w-xl mb-[32px] md:mb-[48px]">
-            We deploy intelligent WhatsApp bots and Voice AI systems that qualify leads, answer customer questions, and book appointments 24/7.
+            We build intelligent AI solutions that automate repetitive work, improve decision-making, and help businesses scale with confidence.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-[12px] sm:gap-[16px] w-full sm:w-auto">
             <Link href="/contact" className="w-full sm:w-auto group relative overflow-hidden rounded-[12px] bg-[#25D366] px-[24px] py-[16px] md:px-[32px] md:py-[18px] text-[15px] md:text-[16px] font-bold text-white shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-[8px]">
-              <span className="relative z-10 uppercase tracking-wide">Build Your AI Agent</span>
-              <Bot className="w-[18px] h-[18px] md:w-[20px] md:h-[20px] relative z-10 group-hover:scale-110 transition-transform" />
+              <span className="relative z-10 uppercase tracking-wide">Book Free Consultation</span>
+            </Link>
+            <Link href="#demo" className="w-full sm:w-auto group relative overflow-hidden rounded-[12px] bg-[#111111] px-[24px] py-[16px] md:px-[32px] md:py-[18px] text-[15px] md:text-[16px] font-bold text-white shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-[8px] border border-white/10 hover:border-[#25D366]/50">
+              <span className="relative z-10 uppercase tracking-wide">Watch Demo</span>
             </Link>
           </div>
         </motion.div>

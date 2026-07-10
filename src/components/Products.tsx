@@ -2,6 +2,7 @@
 
 import { motion, useMotionValue, useSpring, useTransform, useInView } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Building2, Stethoscope, CheckCircle2, ChevronLeft, Phone, Video } from "lucide-react";
 import React, { useRef, useState, useEffect } from "react";
 
@@ -250,9 +251,16 @@ const InteractivePhone = ({ product }: { product: any }) => {
 export default function Products() {
   return (
     <section id="products" className="py-32 relative overflow-hidden bg-paper-white">
-      <div className="absolute inset-0 z-0 pointer-events-none">
+      <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
         <div className="absolute inset-0 bg-paper-white/70 backdrop-blur-[2px] z-10" />
-        <div className="w-full h-full opacity-60 mix-blend-multiply" style={{ backgroundImage: "url('/pricing-bg.png')", backgroundSize: 'cover', backgroundPosition: 'center' }} />
+        <Image
+          src="/pricing-bg.png"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover object-center opacity-60 mix-blend-multiply"
+          loading="lazy"
+        />
       </div>
 
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
@@ -322,7 +330,7 @@ export default function Products() {
                     <ul className="space-y-4 mb-12">
                       {product.features.map((feature, i) => (
                         <li key={i} className="flex items-start gap-3 bg-white/50 backdrop-blur-sm p-3 rounded-xl border border-black/5 shadow-sm">
-                          <CheckCircle2 className={`w-5 h-5 mt-0 shrink-0`} style={{ color: product.color }} />
+                          <CheckCircle2 className={`w-5 h-5 mt-0 shrink-0`} style={{ color: product.color }} aria-hidden="true" />
                           <span className="text-[15px] font-medium text-midnight-ink/90">
                             {feature}
                           </span>

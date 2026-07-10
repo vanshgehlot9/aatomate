@@ -1,226 +1,232 @@
 "use client";
 
-import { motion, useAnimationControls } from "framer-motion";
-import { PhoneCall, HeadphonesIcon, LineChart, Cpu, Workflow, ArrowRight, ArrowLeft, DatabaseZap, Activity } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
-
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  BrainCircuit, 
+  Workflow, 
+  Users, 
+  MessageSquare, 
+  FileText, 
+  GitMerge, 
+  GraduationCap, 
+  BarChart3, 
+  Building2,
+  Cpu,
+  ArrowRight,
+  Sparkles,
+  CheckCircle2
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 import { Database } from "@/lib/types/supabase";
 
 type ServiceType = Database['public']['Tables']['services']['Row']
 
-export default function Services({ services = [] }: { services?: ServiceType[] }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  
-  const scrollLeft = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: -400, behavior: "smooth" });
-    }
-  };
+const IconMap: Record<string, any> = {
+  BrainCircuit, Workflow, Users, MessageSquare, FileText, GitMerge, GraduationCap, BarChart3, Building2, Cpu
+};
 
-  const scrollRight = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 400, behavior: "smooth" });
-    }
-  };
+const gradients = [
+  "from-[#25D366]/40 to-[#25D366]/5",
+  "from-[#fbff00]/40 to-[#fbff00]/5",
+  "from-[#3b82f6]/40 to-[#3b82f6]/5",
+  "from-[#a855f7]/40 to-[#a855f7]/5",
+  "from-[#ef4444]/40 to-[#ef4444]/5",
+  "from-[#f97316]/40 to-[#f97316]/5",
+  "from-[#14b8a6]/40 to-[#14b8a6]/5",
+  "from-[#ec4899]/40 to-[#ec4899]/5",
+  "from-[#8b5cf6]/40 to-[#8b5cf6]/5",
+];
+
+// Abstract SVG patterns for different cards to add more visual interactivity
+const SVGShape = ({ index }: { index: number }) => {
+  if (index % 3 === 0) return (
+    <>
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="absolute top-10 right-10 w-64 h-64 opacity-20 pointer-events-none text-[#25D366]">
+        <path fill="currentColor" d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,81.3,-46.3C90.8,-33.5,96.8,-18,96.5,-2.5C96.2,13,89.6,28.5,80.1,41.9C70.6,55.3,58.2,66.6,44.2,74.9C30.2,83.2,14.6,88.5,-0.6,89.5C-15.8,90.5,-31.6,87.2,-45.5,79.5C-59.4,71.8,-71.4,59.7,-80,45.4C-88.6,31.1,-93.8,14.6,-93.6,-1.7C-93.4,-18,-87.8,-33.9,-78.5,-47.3C-69.2,-60.7,-56.2,-71.6,-42.1,-78.8C-28,-86,-13.9,-89.5,0.7,-90.7C15.3,-91.9,30.6,-83.6,44.7,-76.4Z" transform="translate(100 100)" />
+      </svg>
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="absolute bottom-10 left-10 w-96 h-96 opacity-[0.15] pointer-events-none text-white rotate-45">
+        <path fill="currentColor" d="M39.9,-65.6C52.4,-57.8,63.6,-47,72.7,-34C81.8,-21,88.8,-5.8,87,8.2C85.2,22.2,74.6,35,63.1,46.1C51.6,57.2,39.2,66.6,25.2,73.1C11.2,79.6,-4.4,83.2,-19.9,81.1C-35.4,79,-50.8,71.2,-63.2,59.8C-75.6,48.4,-85,33.4,-88.4,17.4C-91.8,1.4,-89.2,-15.6,-81.4,-29.9C-73.6,-44.2,-60.6,-55.8,-46.8,-63.2C-33,-70.6,-18.4,-73.8,-2.9,-69.1C12.6,-64.4,27.4,-73.4,39.9,-65.6Z" transform="translate(100 100) rotate(45)" />
+      </svg>
+    </>
+  );
+  if (index % 3 === 1) return (
+    <>
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="absolute top-20 right-0 w-72 h-72 opacity-20 pointer-events-none text-[#fbff00]">
+        <path fill="currentColor" d="M47.7,-74.6C60.4,-65.4,68.2,-50,75.4,-34.5C82.6,-19,89.2,-3.4,86.6,10.6C84,24.6,72.2,37,60.2,49.1C48.2,61.2,36,73,21.5,78.8C7,84.6,-9.8,84.4,-25.2,78.9C-40.6,73.4,-54.6,62.6,-65.2,49.5C-75.8,36.4,-83,21,-84.9,5.2C-86.8,-10.6,-83.4,-26.8,-74.5,-39.8C-65.6,-52.8,-51.2,-62.6,-37.2,-70.7C-23.2,-78.8,-9.6,-85.2,4,-90.9C17.6,-96.6,35,-83.8,47.7,-74.6Z" transform="translate(100 100) scale(1.1)" />
+      </svg>
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="absolute -top-10 left-20 w-56 h-56 opacity-10 pointer-events-none text-white -rotate-12">
+        <path fill="currentColor" d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,81.3,-46.3C90.8,-33.5,96.8,-18,96.5,-2.5C96.2,13,89.6,28.5,80.1,41.9C70.6,55.3,58.2,66.6,44.2,74.9C30.2,83.2,14.6,88.5,-0.6,89.5C-15.8,90.5,-31.6,87.2,-45.5,79.5C-59.4,71.8,-71.4,59.7,-80,45.4C-88.6,31.1,-93.8,14.6,-93.6,-1.7C-93.4,-18,-87.8,-33.9,-78.5,-47.3C-69.2,-60.7,-56.2,-71.6,-42.1,-78.8C-28,-86,-13.9,-89.5,0.7,-90.7C15.3,-91.9,30.6,-83.6,44.7,-76.4Z" transform="translate(100 100)" />
+      </svg>
+    </>
+  );
+  return (
+    <>
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="absolute top-0 right-10 w-80 h-80 opacity-20 pointer-events-none text-white">
+        <path fill="currentColor" d="M39.9,-65.6C52.4,-57.8,63.6,-47,72.7,-34C81.8,-21,88.8,-5.8,87,8.2C85.2,22.2,74.6,35,63.1,46.1C51.6,57.2,39.2,66.6,25.2,73.1C11.2,79.6,-4.4,83.2,-19.9,81.1C-35.4,79,-50.8,71.2,-63.2,59.8C-75.6,48.4,-85,33.4,-88.4,17.4C-91.8,1.4,-89.2,-15.6,-81.4,-29.9C-73.6,-44.2,-60.6,-55.8,-46.8,-63.2C-33,-70.6,-18.4,-73.8,-2.9,-69.1C12.6,-64.4,27.4,-73.4,39.9,-65.6Z" transform="translate(100 100) rotate(45)" />
+      </svg>
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="absolute bottom-0 right-40 w-60 h-60 opacity-[0.12] pointer-events-none text-[#25D366] rotate-90">
+        <path fill="currentColor" d="M47.7,-74.6C60.4,-65.4,68.2,-50,75.4,-34.5C82.6,-19,89.2,-3.4,86.6,10.6C84,24.6,72.2,37,60.2,49.1C48.2,61.2,36,73,21.5,78.8C7,84.6,-9.8,84.4,-25.2,78.9C-40.6,73.4,-54.6,62.6,-65.2,49.5C-75.8,36.4,-83,21,-84.9,5.2C-86.8,-10.6,-83.4,-26.8,-74.5,-39.8C-65.6,-52.8,-51.2,-62.6,-37.2,-70.7C-23.2,-78.8,-9.6,-85.2,4,-90.9C17.6,-96.6,35,-83.8,47.7,-74.6Z" transform="translate(100 100) scale(1.1)" />
+      </svg>
+    </>
+  );
+}
+
+export default function Services({ services = [] }: { services?: ServiceType[] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  if (!services || services.length === 0) return null;
+
+  const activeService = services[activeIndex];
+  const IconComponent = activeService?.icon_name && IconMap[activeService.icon_name] ? IconMap[activeService.icon_name] : Cpu;
+  const currentGradient = gradients[activeIndex % gradients.length];
+
+  // Parse benefits safely to show them in the card
+  const rawBenefits = activeService?.benefits;
+  const benefits: string[] = Array.isArray(rawBenefits) ? rawBenefits as string[] : [];
+  // Take only the first 3 benefits to display on the card
+  const displayBenefits = benefits.slice(0, 3);
 
   return (
-    <section id="services" className="relative py-32 px-4 sm:px-6 lg:px-8 bg-[#030303] text-paper-white mt-12 rounded-[48px] lg:rounded-[64px] mx-2 lg:mx-4 overflow-hidden border border-white/5">
-      {/* Background ambient glow */}
-      <div className="absolute top-0 right-0 w-full h-[800px] bg-gradient-to-b from-[#fbff00]/5 via-transparent to-transparent opacity-30 pointer-events-none" />
+    <section id="services" className="relative py-24 md:py-32 px-4 sm:px-6 lg:px-8 bg-[#030303] text-paper-white mt-12 rounded-[48px] lg:rounded-[64px] mx-2 lg:mx-4 overflow-hidden border border-white/5">
       
-      <div className="max-w-7xl mx-auto relative z-10">
+      <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }} />
+
+      <div className="max-w-[1400px] mx-auto relative z-10">
         
-        {/* Section Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-16 flex flex-col lg:flex-row lg:items-end justify-between gap-8"
-        >
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-md">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#fbff00] animate-pulse shadow-[0_0_10px_rgba(251,255,0,0.8)]" />
-              <span className="font-mono text-[11px] text-white uppercase tracking-widest font-bold">Platform Capabilities</span>
-            </div>
-            <h2 className="font-display text-[56px] md:text-[80px] leading-[0.9] tracking-tight uppercase max-w-2xl drop-shadow-2xl">
-              AI Agents for<br /><span className="text-white/30">Every Function.</span>
-            </h2>
-          </div>
-          <p className="text-[16px] md:text-[18px] text-white/50 max-w-sm leading-relaxed font-medium">
-            Production-ready in 2 weeks. Seven battle-tested AI solutions deployed across clinics, e-commerce, and agencies.
-          </p>
-        </motion.div>
-
-        {/* FEATURED: WhatsApp Bot */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full rounded-[32px] md:rounded-[48px] bg-gradient-to-br from-[#111111] to-[#050505] border border-white/10 overflow-hidden mb-8 grid grid-cols-1 lg:grid-cols-2 shadow-2xl relative"
-        >
-          <div className="absolute inset-0 bg-[#fbff00]/5 opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+        {/* Unique Interactive Layout */}
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
           
-          {/* Left Text */}
-          <div className="p-10 md:p-16 flex flex-col justify-center relative z-10 border-b lg:border-b-0 lg:border-r border-white/5">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#25D366]/20 to-[#25D366]/5 border border-[#25D366]/20 flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(37,211,102,0.15)]">
-              {/* WhatsApp Icon SVG */}
-              <svg viewBox="0 0 24 24" className="w-8 h-8 text-[#25D366]" fill="currentColor">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-              </svg>
-            </div>
-            <h3 className="font-display text-[40px] md:text-[56px] leading-[0.9] uppercase tracking-tight text-white mb-6">
-              Full-Scale <br/><span className="text-[#25D366]">WhatsApp AI Bot</span>
-            </h3>
-            <p className="text-[16px] text-white/50 leading-relaxed font-medium mb-10 max-w-md">
-              Don't just send auto-replies. Our WhatsApp AI acts like a brilliant human agent — it handles complex product inquiries, qualifies leads instantly, books appointments, and syncs directly to your CRM.
-            </p>
-            <div className="flex gap-4">
-              <span className="px-4 py-2 rounded-full bg-white/5 text-[13px] font-bold tracking-wide uppercase text-white border border-white/10">24/7 Booking</span>
-              <span className="px-4 py-2 rounded-full bg-white/5 text-[13px] font-bold tracking-wide uppercase text-white border border-white/10">CRM Sync</span>
-            </div>
+          {/* Left Column: Interactive List */}
+          <div className="w-full lg:w-5/12 flex flex-col relative z-20">
+            {services.map((service, idx) => {
+              const isActive = activeIndex === idx;
+              return (
+                <div 
+                  key={service.id} 
+                  onMouseEnter={() => setActiveIndex(idx)}
+                  className={`group cursor-pointer relative overflow-hidden transition-all duration-500 border-b border-white/5 ${isActive ? 'py-8' : 'py-5 hover:py-6'}`}
+                >
+                  {/* Active Indicator Background */}
+                  <div className={`absolute inset-0 bg-white/5 transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-0'}`} />
+                  
+                  {/* Left Accent Bar */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 bg-[#25D366] transition-transform duration-500 origin-left ${isActive ? 'scale-x-100' : 'scale-x-0'}`} />
+                  
+                  <div className={`relative z-10 flex items-center gap-4 md:gap-8 px-4 md:px-8 transition-all duration-500 ${isActive ? 'translate-x-1 md:translate-x-2' : ''}`}>
+                    <span className={`font-mono text-[12px] md:text-[16px] shrink-0 transition-colors duration-500 ${isActive ? 'text-[#25D366] font-bold' : 'text-white/20'}`}>
+                      0{idx + 1}
+                    </span>
+                    <h3 className={`font-display uppercase tracking-tight transition-all duration-500 break-words leading-tight ${isActive ? 'text-[22px] sm:text-[28px] md:text-[44px] text-white' : 'text-[16px] sm:text-[20px] md:text-[32px] text-white/40 group-hover:text-white/70'}`}>
+                      {service.title}
+                    </h3>
+                  </div>
+                  
+                  {/* Mobile Description (Hidden on Desktop) */}
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="lg:hidden px-4 md:px-8 mt-4 overflow-hidden"
+                      >
+                        <p className="text-white/50 mb-6">{service.description}</p>
+                        <Link href={`/services/${service.slug}`} className="inline-flex items-center gap-2 text-[#25D366] font-bold text-[14px] uppercase tracking-widest pb-4">
+                          Explore Service <ArrowRight className="w-4 h-4" />
+                        </Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </div>
-          
-          {/* Right Integration Node Map */}
-          <div className="relative bg-[#050505] p-8 md:p-12 overflow-hidden min-h-[400px] flex items-center justify-center border-l border-white/5">
-            {/* Background Grid & Glows */}
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02] pointer-events-none" />
-            {/* Optimized Background Glows */}
-            <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none" 
-              style={{ background: 'radial-gradient(circle, rgba(37,211,102,0.15) 0%, transparent 60%)' }}
-            />
-            <div className="relative z-10 w-full h-full flex items-center justify-center min-h-[300px]">
+
+          {/* Right Column: Sticky Sticky Preview (Desktop Only) */}
+          <div className="hidden lg:block w-full lg:w-7/12 relative h-full min-h-[650px]">
+            <div className="sticky top-32 w-full h-[650px] rounded-[48px] bg-[#0A0A0A] border border-white/10 overflow-hidden shadow-2xl relative">
               
-              {/* Central WhatsApp Node */}
-              <div className="absolute z-30 w-20 h-20 bg-gradient-to-b from-[#25D366] to-[#128C7E] rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(37,211,102,0.4)] border-4 border-[#050505]">
-                <svg viewBox="0 0 24 24" className="w-10 h-10 text-white" fill="currentColor">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-                </svg>
-                
-                {/* Central Pulse */}
-                <div className="absolute inset-0 rounded-full border border-[#25D366] animate-ping opacity-50" style={{ animationDuration: '2s' }} />
-              </div>
+              <AnimatePresence mode="wait">
+                <motion.div 
+                  key={activeService.id}
+                  initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                  animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
+                  transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                  className="absolute inset-0 p-12 xl:p-16 flex flex-col justify-between"
+                >
+                  {/* Dynamic Glowing Background */}
+                  <div className={`absolute top-0 right-0 w-full h-[500px] bg-gradient-to-bl ${currentGradient} opacity-30 blur-[100px] pointer-events-none rounded-full translate-x-1/4 -translate-y-1/4`} />
+                  
+                  {/* Interactive Abstract SVG Background */}
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+                    className="absolute top-0 right-0 w-full h-full pointer-events-none overflow-hidden"
+                  >
+                    <SVGShape index={activeIndex} />
+                  </motion.div>
+                  
+                  {/* Content Container */}
+                  <div className="relative z-10">
+                    <motion.div 
+                      animate={{ y: [0, -8, 0] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                      className="w-20 h-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mb-8 shadow-2xl backdrop-blur-xl"
+                    >
+                      <IconComponent className="w-10 h-10 text-white" />
+                    </motion.div>
+                    
+                    <h3 className="font-display text-[48px] xl:text-[56px] leading-[1] uppercase tracking-tight text-white mb-6 max-w-lg">
+                      {activeService.title}
+                    </h3>
+                    
+                    <p className="text-[18px] xl:text-[20px] text-white/60 font-medium leading-relaxed max-w-md mb-8">
+                      {activeService.description}
+                    </p>
 
-              {/* Orbital Path (Dashed Circle) */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] h-[240px] rounded-full border border-white/5 border-dashed z-0" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full border border-white/[0.02] border-dashed z-0" />
+                    {/* Rich Description: Display Benefits inside the preview card */}
+                    {displayBenefits.length > 0 && (
+                      <div className="space-y-4 max-w-md">
+                        <div className="text-[12px] font-mono text-[#fbff00] uppercase tracking-widest font-bold mb-4 flex items-center gap-2">
+                          <Sparkles className="w-3 h-3" /> Key Benefits
+                        </div>
+                        {displayBenefits.map((benefit, i) => (
+                          <motion.div 
+                            key={i}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 + (i * 0.1) }}
+                            className="flex items-start gap-3"
+                          >
+                            <CheckCircle2 className="w-5 h-5 text-[#25D366] shrink-0 mt-0.5" />
+                            <span className="text-white/80 text-[15px] font-medium leading-snug">{benefit}</span>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-              {/* Connected Node 1: AI Engine (Top Left) */}
-              <div className="absolute top-[15%] left-[20%] flex flex-col items-center gap-2 z-20">
-                <div className="w-12 h-12 rounded-2xl bg-[#111111] border border-white/10 flex items-center justify-center shadow-xl">
-                  <Cpu className="w-5 h-5 text-white" />
-                </div>
-                <span className="font-mono text-[9px] uppercase tracking-widest text-white/40">GPT-4 Omni</span>
-                
-                {/* Connection Line */}
-                <svg className="absolute top-full left-1/2 w-[80px] h-[60px] pointer-events-none -z-10 overflow-visible">
-                  <path d="M 0 0 Q 20 40 50 70" fill="none" stroke="rgba(37,211,102,0.2)" strokeWidth="2" strokeDasharray="4 4" />
-                  <circle cx="50" cy="70" r="2" fill="#25D366" />
-                </svg>
-              </div>
-
-              {/* Connected Node 2: CRM (Top Right) */}
-              <div className="absolute top-[10%] right-[15%] flex flex-col items-center gap-2 z-20">
-                <div className="w-12 h-12 rounded-2xl bg-[#111111] border border-[#fbff00]/20 flex items-center justify-center shadow-[0_0_20px_rgba(251,255,0,0.1)]">
-                  <DatabaseZap className="w-5 h-5 text-[#fbff00]" />
-                </div>
-                <span className="font-mono text-[9px] uppercase tracking-widest text-[#fbff00]/60">CRM Sync</span>
-                
-                {/* Connection Line */}
-                <svg className="absolute top-full right-1/2 w-[80px] h-[80px] pointer-events-none -z-10 overflow-visible" style={{ transform: 'scaleX(-1)' }}>
-                  <path d="M 0 0 Q 30 50 60 90" fill="none" stroke="rgba(251,255,0,0.2)" strokeWidth="2" strokeDasharray="4 4" />
-                </svg>
-              </div>
-
-              {/* Connected Node 3: Calendar (Bottom Left) */}
-              <div className="absolute bottom-[10%] left-[10%] flex flex-col items-center gap-2 z-20">
-                <div className="w-12 h-12 rounded-2xl bg-[#111111] border border-[#3b82f6]/20 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.1)]">
-                  <svg className="w-5 h-5 text-[#3b82f6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                </div>
-                <span className="font-mono text-[9px] uppercase tracking-widest text-[#3b82f6]/60">Calendar API</span>
-              </div>
-
-              {/* Connected Node 4: Payments (Bottom Right) */}
-              <div className="absolute bottom-[20%] right-[10%] flex flex-col items-center gap-2 z-20">
-                <div className="w-12 h-12 rounded-2xl bg-[#111111] border border-[#a855f7]/20 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.1)]">
-                  <svg className="w-5 h-5 text-[#a855f7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-                </div>
-                <span className="font-mono text-[9px] uppercase tracking-widest text-[#a855f7]/60">Payments</span>
-              </div>
-
-              {/* Orbiting Data Packets (Glowing Dots) */}
-              <motion.div 
-                animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                className="absolute top-1/2 left-1/2 w-[240px] h-[240px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-transparent"
-              >
-                <div className="absolute top-0 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#fbff00] shadow-[0_0_10px_#fbff00]" />
-              </motion.div>
-              
-              <motion.div 
-                animate={{ rotate: -360 }}
-                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-                className="absolute top-1/2 left-1/2 w-[340px] h-[340px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-transparent"
-              >
-                <div className="absolute top-1/2 left-0 w-2 h-2 -translate-y-1/2 -translate-x-1/2 rounded-full bg-[#3b82f6] shadow-[0_0_10px_#3b82f6]" />
-                <div className="absolute bottom-0 left-1/2 w-2 h-2 -translate-x-1/2 translate-y-1/2 rounded-full bg-[#25D366] shadow-[0_0_10px_#25D366]" />
-              </motion.div>
-
+                  <div className="relative z-10 pt-10 mt-auto border-t border-white/10 flex items-center justify-between">
+                    <div className="flex gap-2">
+                      {services.map((_, i) => (
+                        <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${activeIndex === i ? 'w-8 bg-white' : 'w-2 bg-white/20'}`} />
+                      ))}
+                    </div>
+                    <Link href={`/services/${activeService.slug}`} className="group flex items-center gap-4 bg-white text-black px-8 py-4 rounded-full font-bold uppercase tracking-widest text-[14px] hover:scale-105 transition-transform active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                      View Details
+                      <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white group-hover:translate-x-1 transition-transform">
+                        <ArrowRight className="w-4 h-4 -rotate-45 group-hover:rotate-0 transition-transform duration-300" />
+                      </div>
+                    </Link>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
-        </motion.div>
 
-        {/* CAROUSEL HEADER */}
-        <div className="flex items-center justify-between mb-8">
-          <h3 className="font-mono text-[14px] uppercase tracking-widest text-white/50 font-bold">More Automation Solutions</h3>
-          <div className="flex gap-2">
-            <button onClick={scrollLeft} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:bg-white/10 hover:text-white transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <button onClick={scrollRight} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:bg-white/10 hover:text-white transition-colors">
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </div>
         </div>
-
-        {/* CAROUSEL TRACK */}
-        <div 
-          ref={scrollRef}
-          className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar relative"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {services.map((service, index) => (
-            <div
-              key={service.id}
-              className="snap-start flex-shrink-0 w-[300px] md:w-[380px] p-8 rounded-[32px] bg-[#0A0A0A] border border-white/5 hover:border-white/15 transition-all duration-300 group relative overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#fbff00]/0 to-[#fbff00]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-16 group-hover:bg-[#fbff00] group-hover:text-black group-hover:scale-110 transition-all duration-300">
-                  <Cpu className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="font-display text-[26px] leading-none mb-3 uppercase tracking-tight text-white group-hover:text-[#fbff00] transition-colors">
-                    {service.title}
-                  </h4>
-                  <p className="text-[14px] leading-relaxed text-white/40 font-medium group-hover:text-white/60 transition-colors">
-                    {service.description}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Global style for hiding scrollbar in carousel */}
-        <style dangerouslySetInnerHTML={{__html: `
-          .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-          }
-        `}} />
-
       </div>
     </section>
   );

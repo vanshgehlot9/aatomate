@@ -122,5 +122,51 @@ export const productsData = [
       { question: "Does it support multiple languages?", answer: "Yes, the bot automatically detects the guest's language and replies accordingly in over 50 languages." },
       { question: "How are payments handled?", answer: "We integrate directly with Stripe to send secure, encrypted payment links inside the chat." }
     ]
+  },
+  {
+    slug: "provaluate",
+    themeColor: "#3b82f6", // Tech Blue
+    icon: "FileText",
+    hero: {
+      title: "ProValuate: AI Document Extraction",
+      subtitle: "Automate invoice processing, contract analysis, and data entry with 99.9% accuracy.",
+      bgPattern: "radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 50%)",
+      floatingCards: ["Data Extracted", "Exported to CSV", "Error Free"]
+    },
+    demoVideo: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    screenshots: [
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80"
+    ],
+    comparison: [
+      { feature: "Processing Speed", aatomate: "2 seconds / doc", competitor: "3-5 mins / doc" },
+      { feature: "Accuracy Rate", aatomate: "99.9%", competitor: "85%" },
+      { feature: "Handwriting Recognition", aatomate: "Supported", competitor: "No" },
+      { feature: "API Integration", aatomate: "1-Click Connect", competitor: "Requires Developer" }
+    ],
+    pricing: {
+      monthly: "$299",
+      yearly: "$2,990"
+    },
+    problems: [
+      { title: "Manual Data Entry", description: "Teams spend hundreds of hours manually typing invoice data into ERPs." },
+      { title: "Human Errors", description: "Typographical errors in financial documents lead to massive compliance risks." }
+    ],
+    solutions: [
+      { title: "Instant Extraction", description: "AI instantly pulls key-value pairs, tables, and signatures from any PDF or Image.", icon: "Zap" },
+      { title: "Direct ERP Sync", description: "Extracted data is automatically pushed to SAP, Oracle, or QuickBooks.", icon: "Database" }
+    ],
+    chatDemo: [], // Not applicable for this product
+    workflow: [
+      "Upload PDF/Image",
+      "AI scans document",
+      "Extracts key fields & tables",
+      "Validates against rules",
+      "Pushes to Database"
+    ],
+    integrations: ["SAP", "QuickBooks", "Xero", "Salesforce"],
+    faqs: [
+      { question: "Does it support handwritten notes?", answer: "Yes, our advanced OCR engine can read unstructured handwritten text accurately." }
+    ]
   }
 ];

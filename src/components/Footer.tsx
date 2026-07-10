@@ -95,20 +95,23 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Products */}
+          {/* Industries */}
           <div className="lg:col-span-2">
-            <h4 className="font-mono text-[11px] uppercase text-white font-bold tracking-widest mb-[32px]">Products</h4>
+            <h4 className="font-mono text-[11px] uppercase text-white font-bold tracking-widest mb-[32px]">Industries</h4>
             <ul className="flex flex-col gap-[16px]">
-              <li><Link href="/products/doctor-bot" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">Hospital Bot</Link></li>
-              <li><Link href="/products/hotel-bot" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">Hotel Bot</Link></li>
+              <li><Link href="/industries/healthcare" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">Healthcare</Link></li>
+              <li><Link href="/industries/manufacturing" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">Manufacturing</Link></li>
+              <li><Link href="/industries/retail" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">Retail & E-commerce</Link></li>
+              <li><Link href="/industries/finance" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">Finance</Link></li>
             </ul>
           </div>
 
-          {/* Company */}
+          {/* Company & Products */}
           <div className="lg:col-span-2">
             <h4 className="font-mono text-[11px] uppercase text-white font-bold tracking-widest mb-[32px]">Company</h4>
             <ul className="flex flex-col gap-[16px]">
-              <li><Link href="#process" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">How It Works</Link></li>
+              <li><Link href="/products/provaluate" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">ProValuate</Link></li>
+              <li><Link href="/blog" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">Blog & Insights</Link></li>
               <li><Link href="#pricing" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">Pricing</Link></li>
               <li><Link href="/contact" className="text-[14px] text-white/60 hover:text-[#fbff00] transition-colors">Contact Us</Link></li>
             </ul>
