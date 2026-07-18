@@ -93,6 +93,7 @@ def _register_webhook(base_url: str) -> bool:
     payload = {
         "override_callback_uri": callback_url,
         "verify_token": verify_token or "12345",
+        "subscribed_fields": ["messages", "message_template_status_update", "account_update"]
     }
 
     logger.info(f"[webhook_sync] Registering webhook: {callback_url}")
